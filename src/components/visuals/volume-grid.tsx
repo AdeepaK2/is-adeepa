@@ -26,7 +26,15 @@ export function VolumeGrid({
   speed = 0.6,
 }: VolumeGridProps) {
   return (
-    <SceneCanvas camera={[5.2, 3.4, 6.2]} fov={40}>
+    <SceneCanvas
+      camera={[5.2, 3.4, 6.2]}
+      fov={40}
+      fallback={
+        <div className="text-ink-faint grid h-full w-full place-items-center px-6 text-center text-xs">
+          This visual needs WebGL, which isn&apos;t available in your browser.
+        </div>
+      }
+    >
       <ambientLight intensity={0.55} />
       <directionalLight position={[4, 6, 5]} intensity={1.1} />
       <Lattice size={size} hue={hue} speed={speed} />
@@ -83,12 +91,7 @@ function Lattice({ size, hue, speed }: Required<VolumeGridProps>) {
 
     instanced.instanceMatrix.needsUpdate = true;
     if (instanced.instanceColor) instanced.instanceColor.needsUpdate = true;
-  });
-
-  useFrame(({ clock }) => {
-    if (mesh.current) {
-      mesh.current.rotation.y = clock.getElapsedTime() * 0.12;
-    }
+    instanced.rotation.y = clock.getElapsedTime() * 0.12;
   });
 
   return (

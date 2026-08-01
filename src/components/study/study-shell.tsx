@@ -10,7 +10,7 @@ import { VisualStage } from "./visual-stage";
 type Tab = "study" | "pdf";
 
 /**
- * The per-paper study view. Concept content is data, not code -- see
+ * The per-paper study view. Concept content is data, not code — see
  * `src/data/modules/`. Papers without a module yet still get the overview and
  * the PDF reader.
  */

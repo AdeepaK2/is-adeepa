@@ -3,7 +3,7 @@ import type { ArchitectureFamily, Paper } from "@/types/paper";
 /**
  * The paper library. Metadata was taken from each PDF's own front matter.
  * `status: "planned"` means the interactive study module has not been authored
- * yet -- the paper still opens, it just shows the PDF and its overview.
+ * yet — the paper still opens, it just shows the PDF and its overview.
  */
 export const papers: Paper[] = [
   {
@@ -153,7 +153,7 @@ export const papers: Paper[] = [
     pageCount: 12,
     pdf: "/papers/kiannet-cnn-lstm.pdf",
     summary:
-      "A CNN reads each frame, an LSTM carries the story across frames, and attention decides which moments deserve weight -- the classic recipe, tuned for surveillance footage.",
+      "A CNN reads each frame, an LSTM carries the story across frames, and attention decides which moments deserve weight — the classic recipe, tuned for surveillance footage.",
     architecture: "CNN-LSTM",
     datasets: ["UCF-Crime"],
     tags: ["LSTM", "attention", "sequence modelling"],
@@ -215,7 +215,7 @@ export const papers: Paper[] = [
     pageCount: 18,
     pdf: "/papers/spatio-temporal-model.pdf",
     summary:
-      "Keeps the cheap 2D CNN backbone and adds two attention modules -- one choosing where to look in the frame, one choosing when in the clip -- to recover 3D-level accuracy.",
+      "Keeps the cheap 2D CNN backbone and adds two attention modules — one choosing where to look in the frame, one choosing when in the clip — to recover 3D-level accuracy.",
     architecture: "2D CNN + Attention",
     datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
     tags: ["spatial attention", "temporal attention", "2D CNN"],
@@ -234,7 +234,7 @@ export const papers: Paper[] = [
     pageCount: 17,
     pdf: "/papers/spiking-neural-networks.pdf",
     summary:
-      "Swaps continuous activations for neurons that fire in discrete spikes, so time is encoded in the network itself rather than bolted on -- a natural fit for low-power hardware.",
+      "Swaps continuous activations for neurons that fire in discrete spikes, so time is encoded in the network itself rather than bolted on — a natural fit for low-power hardware.",
     architecture: "Spiking Neural Network",
     datasets: ["RWF-2000", "Hockey Fight", "Movies", "Crowd Violence"],
     tags: ["spiking neurons", "neuromorphic", "temporal coding"],

@@ -11,7 +11,7 @@ export function Hero() {
       <div className="bg-grid absolute inset-0 opacity-[0.35]" />
       <HeroVisual />
       {/* Fade the visual out behind the text so the copy stays legible. */}
-      <div className="from-base via-base/85 absolute inset-0 bg-gradient-to-r to-transparent" />
+      <div className="from-base via-base/80 absolute inset-0 bg-gradient-to-r from-35% via-55% to-transparent" />
       <div className="from-base absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-6 py-24 sm:py-32">

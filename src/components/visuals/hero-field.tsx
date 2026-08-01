@@ -64,9 +64,10 @@ function FrameStack() {
             position={[0, 0, -offset + i * FRAME_GAP]}
           >
             <lineBasicMaterial
-              color={i === FRAME_COUNT - 1 ? "#5eead4" : "#3b475e"}
+              // The frontmost frame is the "current" one and reads as the accent.
+              color={i === FRAME_COUNT - 1 ? "#5eead4" : "#5f7395"}
               transparent
-              opacity={0.12 + depth * 0.55}
+              opacity={0.2 + depth * 0.7}
             />
           </lineSegments>
         );
@@ -118,10 +119,10 @@ function FeaturePoints() {
     <points ref={points} geometry={geometry}>
       <pointsMaterial
         color="#5eead4"
-        size={0.028}
+        size={0.042}
         sizeAttenuation
         transparent
-        opacity={0.55}
+        opacity={0.85}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />

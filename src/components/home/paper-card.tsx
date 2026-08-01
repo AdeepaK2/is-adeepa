@@ -46,8 +46,11 @@ export function PaperCard({ paper }: { paper: Paper }) {
         {paper.summary}
       </p>
 
-      <div className="text-ink-faint mt-4 flex items-center gap-1.5 font-mono text-[11px]">
-        <span>{formatAuthors(paper.authors)}</span>
+      {/* mt-auto keeps the metadata aligned across cards of differing text length. */}
+      <div className="text-ink-faint mt-auto flex items-center gap-1.5 pt-4 font-mono text-[11px]">
+        <span className="shrink-0 whitespace-nowrap">
+          {formatAuthors(paper.authors)}
+        </span>
         <span aria-hidden>·</span>
         <span className="truncate">{paper.venue}</span>
       </div>
