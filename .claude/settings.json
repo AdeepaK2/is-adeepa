@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p public/papers)",
+      "Bash(mv \"3D CNN.pdf\" public/papers/3d-cnn.pdf)",
+      "Bash(mv \"A spatio‑temporal model for violence detection .pdf\" public/papers/spatio-temporal-model.pdf)",
+      "Bash(mv \"AI-based Violent Incident Detection in Surveillance Videos to Enhance Public Safety.pdf\" public/papers/ai-violent-incident-detection.pdf)",
+      "Bash(mv \"An accurate violence detection.pdf\" public/papers/accurate-violence-detection.pdf)",
+      "Bash(python3 -c \"import pypdf; print\\('pypdf ok'\\)\")",
+      "Bash(/private/tmp/claude-501/-Users-adeepak-Developer-Learn/441a271a-67ea-4e6f-88df-68a6f5e071b6/scratchpad/venv/bin/python -)",
+      "Bash(node -e ' *)",
+      "Bash(sed -i '' -e 's/\\\\bconst module = getStudyModule/const studyModule = getStudyModule/' -e 's/module={module}/studyModule={studyModule}/g' src/app/papers/[slug]/page.tsx)",
+      "Bash(sed -i '' -e 's/\\\\bmodule\\\\b/studyModule/g' src/components/study/study-shell.tsx src/components/study/paper-header.tsx)",
+      "Bash(perl -pi -e 's/\\\\bmodule\\\\b/studyModule/g' src/components/study/study-shell.tsx src/components/study/paper-header.tsx \"src/app/papers/[slug]/page.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"home:%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"paper:%{http_code}\\\\n\" http://localhost:3000/papers/kiannet-cnn-lstm)",
+      "Bash(curl -s -o /dev/null -w \"pdf:%{http_code}\\\\n\" http://localhost:3000/papers/kiannet-cnn-lstm.pdf)",
+      "Bash(curl -s -o /dev/null -w \"pdfasset:%{http_code}\\\\n\" \"http://localhost:3000/papers/3d-cnn.pdf\")"
+    ]
+  }
+}
