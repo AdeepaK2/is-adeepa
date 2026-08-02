@@ -27,7 +27,7 @@ export const papers: Paper[] = [
     datasets: ["RWF-2000", "Crowd Violence", "UCF-Crime"],
     tags: ["3D convolution", "optical flow", "data augmentation"],
     hue: 210,
-    status: "planned",
+    status: "ready",
   },
   {
     slug: "accurate-violence-detection",

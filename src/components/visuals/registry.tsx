@@ -13,6 +13,21 @@ const VolumeGrid = dynamic(
   { ssr: false, loading: () => <VisualSkeleton /> },
 );
 
+const TwoStreamFlow = dynamic(
+  () => import("./two-stream-flow").then((m) => m.TwoStreamFlow),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
+const SequenceTimeline = dynamic(
+  () => import("./sequence-timeline").then((m) => m.SequenceTimeline),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
+const ResnetStack = dynamic(
+  () => import("./resnet-stack").then((m) => m.ResnetStack),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
 /**
  * Visuals are addressed by id and configured with a free-form options bag, so
  * the registry has to erase their individual prop types. Each visual validates
@@ -28,6 +43,9 @@ export type VisualComponent = ComponentType<Record<string, unknown>>;
  */
 export const visualRegistry: Partial<Record<VisualId, VisualComponent>> = {
   "volume-grid": VolumeGrid as VisualComponent,
+  "two-stream-flow": TwoStreamFlow as VisualComponent,
+  "sequence-timeline": SequenceTimeline as VisualComponent,
+  "resnet-stack": ResnetStack as VisualComponent,
 };
 
 export function VisualSkeleton() {

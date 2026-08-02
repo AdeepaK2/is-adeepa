@@ -1,8 +1,23 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Component, Suspense } from "react";
 import type { ErrorInfo, ReactNode } from "react";
+
+/**
+ * Uniform scale that keeps a scene of the given world size inside the canvas.
+ *
+ * The study visuals are laid out wide -- a 149-frame filmstrip, a two-lane
+ * network -- and the stage they mount into is a fixed height, so on a narrow
+ * screen the ends would simply fall outside the frustum. Scenes call this and
+ * apply it to their root group so they shrink to fit instead of being cropped.
+ */
+export function useFitScale(worldWidth: number, worldHeight?: number): number {
+  const viewport = useThree((state) => state.viewport);
+  const byWidth = viewport.width / worldWidth;
+  const byHeight = worldHeight ? viewport.height / worldHeight : Infinity;
+  return Math.min(1, byWidth, byHeight);
+}
 
 interface SceneCanvasProps {
   children: ReactNode;

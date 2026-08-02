@@ -60,6 +60,26 @@ export function StudyShell({
               </h2>
             </header>
 
+            {active.highlight && (
+              <p
+                className="border-line bg-panel/60 mt-5 inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-[var(--radius-card)] border px-4 py-2.5"
+                style={{ borderColor: `color-mix(in oklab, ${accent} 35%, transparent)` }}
+              >
+                <span className="eyebrow">{active.highlight.label}</span>
+                <span
+                  className="font-mono text-lg tabular-nums"
+                  style={{ color: accent }}
+                >
+                  {active.highlight.value}
+                </span>
+                {active.highlight.note && (
+                  <span className="text-ink-faint text-xs">
+                    {active.highlight.note}
+                  </span>
+                )}
+              </p>
+            )}
+
             <div className="mt-5 max-w-2xl space-y-4">
               {active.note.map((paragraph, i) => (
                 <p key={i} className="text-ink-muted leading-relaxed">

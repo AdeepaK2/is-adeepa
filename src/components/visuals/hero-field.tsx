@@ -65,7 +65,7 @@ function FrameStack() {
           >
             <lineBasicMaterial
               // The frontmost frame is the "current" one and reads as the accent.
-              color={i === FRAME_COUNT - 1 ? "#5eead4" : "#5f7395"}
+              color={i === FRAME_COUNT - 1 ? "#5eead4" : "#818894"}
               transparent
               opacity={0.2 + depth * 0.7}
             />

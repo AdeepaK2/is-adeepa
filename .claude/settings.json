@@ -15,7 +15,8 @@
       "Bash(curl -s -o /dev/null -w \"home:%{http_code}\\\\n\" http://localhost:3000/)",
       "Bash(curl -s -o /dev/null -w \"paper:%{http_code}\\\\n\" http://localhost:3000/papers/kiannet-cnn-lstm)",
       "Bash(curl -s -o /dev/null -w \"pdf:%{http_code}\\\\n\" http://localhost:3000/papers/kiannet-cnn-lstm.pdf)",
-      "Bash(curl -s -o /dev/null -w \"pdfasset:%{http_code}\\\\n\" \"http://localhost:3000/papers/3d-cnn.pdf\")"
+      "Bash(curl -s -o /dev/null -w \"pdfasset:%{http_code}\\\\n\" \"http://localhost:3000/papers/3d-cnn.pdf\")",
+      "Bash(/private/tmp/claude-501/-Users-adeepak-Developer-Learn/281dd144-3171-43c5-93f2-905eb846f5b4/scratchpad/v/bin/python3 -c ' *)"
     ]
   }
 }

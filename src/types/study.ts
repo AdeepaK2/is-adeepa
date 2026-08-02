@@ -11,7 +11,8 @@ export type VisualId =
   | "volume-grid"
   | "two-stream-flow"
   | "attention-map"
-  | "sequence-timeline";
+  | "sequence-timeline"
+  | "resnet-stack";
 
 export interface Visual {
   kind: VisualId;
@@ -27,6 +28,8 @@ export interface Concept {
   title: string;
   /** One line shown in the concept rail. */
   tagline: string;
+  /** The single number worth remembering, shown as a badge above the note. */
+  highlight?: { label: string; value: string; note?: string };
   /** The short note -- a few short paragraphs, plain language. */
   note: string[];
   /** Optional bullet takeaways rendered under the note. */

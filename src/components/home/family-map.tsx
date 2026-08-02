@@ -28,7 +28,7 @@ export function FamilyMap() {
   return (
     <section
       id="families"
-      className="border-line/70 scroll-mt-20 border-t bg-[#070912]"
+      className="border-line/70 bg-void/60 scroll-mt-20 border-t"
     >
       <div className="mx-auto max-w-7xl px-6 py-20">
         <header className="max-w-2xl">

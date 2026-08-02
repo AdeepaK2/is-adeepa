@@ -1,4 +1,5 @@
 import type { StudyModule } from "@/types/study";
+import { module3dCnn } from "./3d-cnn";
 
 /**
  * Registry of authored study modules, keyed by paper slug.
@@ -11,7 +12,9 @@ import type { StudyModule } from "@/types/study";
  * Papers without an entry fall back to the overview + PDF reader, so the app
  * stays usable while modules are written one at a time.
  */
-export const studyModules: Record<string, StudyModule> = {};
+export const studyModules: Record<string, StudyModule> = {
+  "3d-cnn": module3dCnn,
+};
 
 export function getStudyModule(slug: string): StudyModule | undefined {
   return studyModules[slug];
