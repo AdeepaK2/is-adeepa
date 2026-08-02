@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { cn } from "@/lib/utils";
+import { cn, hueColor } from "@/lib/utils";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import {
   ControlGroup,
@@ -12,6 +12,7 @@ import {
   SegmentedControl,
   WebGLFallback,
 } from "./controls";
+import { HoverFrame, useSceneHover, type SceneHover } from "./hover";
 import { SceneCanvas, useFitScale } from "./scene-canvas";
 
 /** How a lane is drawn: carrying data, switched off, or right/wrong on a case. */
@@ -68,11 +69,12 @@ export function TwoStreamFlow({
   cases = [],
   labels = { rgb: "RGB frames", flow: "optical flow" },
 }: TwoStreamFlowProps) {
-  const accent = `hsl(${hue} 78% 62%)`;
+  const accent = hueColor(hue);
 
   const [selection, setSelection] = useState<Selection>("both");
   const [caseId, setCaseId] = useState(() => cases[0]?.id ?? "");
   const [fusionId, setFusionId] = useState(() => bestFusion(fusion)?.id ?? "");
+  const { frame, hover, hovered } = useSceneHover();
 
   const active = cases.find((item) => item.id === caseId) ?? cases[0];
   const activeFusion = fusion.find((row) => row.id === fusionId);
@@ -90,13 +92,24 @@ export function TwoStreamFlow({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1">
-        <SceneCanvas camera={[0, 0.5, 8.4]} fov={42} fallback={<WebGLFallback />}>
+      <HoverFrame frame={frame} hovered={hovered}>
+        <SceneCanvas
+          camera={[0, 0.5, 8.4]}
+          fov={42}
+          fallback={<WebGLFallback />}
+          orbit
+        >
           <ambientLight intensity={0.6} />
           <directionalLight position={[2, 5, 6]} intensity={1} />
-          <Streams lanes={lanes} output={output} hue={hue} />
+          <Streams
+            lanes={lanes}
+            output={output}
+            hue={hue}
+            labels={labels}
+            hover={hover}
+          />
         </SceneCanvas>
-      </div>
+      </HoverFrame>
 
       {mode === "fusion" ? (
         <ControlRow>
@@ -219,10 +232,14 @@ function Streams({
   lanes,
   output,
   hue,
+  labels,
+  hover,
 }: {
   lanes: { rgb: LaneState; flow: LaneState };
   output: LaneState;
   hue: number;
+  labels: { rgb: string; flow: string };
+  hover: SceneHover;
 }) {
   const reduced = useReducedMotion();
   const rgbPulse = useRef<THREE.Mesh>(null);
@@ -231,11 +248,13 @@ function Streams({
 
   const palette = useMemo(
     () => ({
-      rgb: new THREE.Color(`hsl(${hue}, 72%, 58%)`),
-      flow: new THREE.Color(`hsl(${(hue + 55) % 360}, 72%, 58%)`),
-      off: new THREE.Color("#3b3f47"),
-      fail: new THREE.Color("#fb7185"),
-      lit: new THREE.Color(`hsl(${hue}, 95%, 76%)`),
+      rgb: new THREE.Color(`hsl(${hue}, 60%, 48%)`),
+      flow: new THREE.Color(`hsl(${(hue + 55) % 360}, 60%, 48%)`),
+      // A switched-off lane recedes toward the panel, so `off` is the line
+      // color rather than the dark it was on the dark stage.
+      off: new THREE.Color("#c6cbd3"),
+      fail: new THREE.Color("#be123c"),
+      lit: new THREE.Color(`hsl(${hue}, 88%, 40%)`),
     }),
     [hue],
   );
@@ -245,6 +264,16 @@ function Streams({
     if (state === "fail") return palette.fail;
     return palette[lane];
   };
+
+  /** How a lane is doing, in the words the controls use. */
+  const stateWord = (state: LaneState) =>
+    state === "off"
+      ? "switched off"
+      : state === "ok"
+        ? "classified it correctly"
+        : state === "fail"
+          ? "got it wrong"
+          : "running";
 
   const scale = useFitScale(Math.abs(START_X) + OUT_X + 1, 4);
 
@@ -273,11 +302,32 @@ function Streams({
         const color = colorFor(lane, state);
         const dim = state === "off";
 
+        const name = labels[lane];
+
         return (
           <group key={lane} position={[0, y, 0]}>
-            <FrameStack color={color} dim={dim} startX={START_X} />
+            <FrameStack
+              color={color}
+              dim={dim}
+              startX={START_X}
+              hover={hover}
+              label={`${name} · input clip · ${
+                lane === "rgb" ? "3 channels" : "2 channels, horizontal and vertical"
+              }`}
+            />
             {BLOCK_X.map((x, index) => (
-              <mesh key={x} position={[x, 0, 0]}>
+              <mesh
+                key={x}
+                position={[x, 0, 0]}
+                onPointerMove={(event) => {
+                  event.stopPropagation();
+                  hover.show(
+                    `${name} · 3D ResNet-18 stage ${index + 1} · ${stateWord(state)}`,
+                    event,
+                  );
+                }}
+                onPointerOut={hover.hide}
+              >
                 <boxGeometry
                   args={[BLOCK_WIDTH, 0.9 - index * 0.12, 0.9 - index * 0.12]}
                 />
@@ -313,12 +363,19 @@ function Streams({
             rotation={[0, 0, Math.atan2(-y, dx)]}
           >
             <boxGeometry args={[Math.hypot(dx, y), 0.03, 0.03]} />
-            <meshBasicMaterial color="#50555f" />
+            <meshBasicMaterial color="#c6cbd3" />
           </mesh>
         );
       })}
 
-      <mesh position={[SUM_X, 0, 0]}>
+      <mesh
+        position={[SUM_X, 0, 0]}
+        onPointerMove={(event) => {
+          event.stopPropagation();
+          hover.show("late fusion · the two streams' scores are added", event);
+        }}
+        onPointerOut={hover.hide}
+      >
         <sphereGeometry args={[0.3, 24, 24]} />
         <meshStandardMaterial
           color={output === "fail" ? palette.fail : palette.lit}
@@ -331,7 +388,19 @@ function Streams({
         <meshBasicMaterial color={palette.lit} />
       </mesh>
 
-      <mesh position={[OUT_X, 0, 0]}>
+      <mesh
+        position={[OUT_X, 0, 0]}
+        onPointerMove={(event) => {
+          event.stopPropagation();
+          hover.show(
+            `softmax · fight or non-fight · ${
+              output === "fail" ? "wrong on this clip" : "correct on this clip"
+            }`,
+            event,
+          );
+        }}
+        onPointerOut={hover.hide}
+      >
         <boxGeometry args={[0.45, 0.9, 0.9]} />
         <meshStandardMaterial
           color={output === "fail" ? palette.fail : palette.lit}
@@ -350,10 +419,14 @@ function FrameStack({
   color,
   dim,
   startX,
+  hover,
+  label,
 }: {
   color: THREE.Color;
   dim: boolean;
   startX: number;
+  hover: SceneHover;
+  label: string;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
 
@@ -378,7 +451,15 @@ function FrameStack({
   });
 
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, FRAMES]}>
+    <instancedMesh
+      ref={mesh}
+      args={[undefined, undefined, FRAMES]}
+      onPointerMove={(event) => {
+        event.stopPropagation();
+        hover.show(label, event);
+      }}
+      onPointerOut={hover.hide}
+    >
       <boxGeometry args={[0.05, 1, 1]} />
       <meshStandardMaterial
         roughness={0.5}

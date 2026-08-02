@@ -24,7 +24,10 @@ export const papers: Paper[] = [
     summary:
       "Runs RGB frames and optical flow through two parallel 3D CNNs, then adds a custom spatiotemporal crop so the network trains on the region where the action actually happens.",
     architecture: "Two-Stream",
-    datasets: ["RWF-2000", "Crowd Violence", "UCF-Crime"],
+    // Results are reported on RWF-2000 only. Crowd Violence and UCF-Crime are
+    // named in the introduction as existing datasets and never run -- see the
+    // review extraction, which records that distinction per dataset.
+    datasets: ["RWF-2000"],
     tags: ["3D convolution", "optical flow", "data augmentation"],
     hue: 210,
     status: "ready",

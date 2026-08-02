@@ -39,6 +39,74 @@ export interface Concept {
   pdfPage?: number;
 }
 
+/**
+ * How a paper's own claim stands up to the evidence it reports.
+ *
+ * Kept separate from the claim's text because the review's second question is
+ * exactly this gap -- whether "real-time" and "lightweight" survive contact with
+ * the paper's own numbers. `refuted` is reserved for a claim the paper's own
+ * measurements contradict, not one this review disagrees with.
+ */
+export type ClaimStatus =
+  | "not-addressed"
+  | "claimed-without-evidence"
+  | "measured-and-supported"
+  | "measured-and-refuted";
+
+export type AttentionKind = "channel" | "spatial" | "temporal" | "self" | "none";
+
+/** Which of a paper's datasets carry a result, and which are only named. */
+export type DatasetRole = "evaluation" | "pre-training" | "mentioned-only";
+
+/**
+ * The comparable extraction from one paper, along the review's four axes.
+ *
+ * Structured rather than prose so the same field can be read across eighteen
+ * papers and turned into a comparison table. Anything the paper does not report
+ * is left `undefined` and rendered as "not reported" -- never inferred, since a
+ * silent gap is itself a finding about how the field reports its work.
+ */
+export interface ReviewProfile {
+  architecture: {
+    family: string;
+    backbone: string;
+    /** How motion enters the representation at all -- the core design question. */
+    motionEncoding: string;
+    inputs: string[];
+    fusion?: string;
+    supervision: string;
+    notes?: string[];
+  };
+  attention: {
+    /** `false` is a finding, not a gap: the paper deliberately uses none. */
+    used: boolean;
+    kinds: AttentionKind[];
+    mechanisms?: {
+      name: string;
+      placement: string;
+      reportedEffect: string;
+    }[];
+    notes?: string[];
+  };
+  efficiency: {
+    parameters?: string;
+    flops?: string;
+    modelSize?: string;
+    throughput?: string;
+    hardware?: string;
+    realTime: { status: ClaimStatus; note: string };
+    edgeDeployment: { status: ClaimStatus; note: string };
+    notes?: string[];
+  };
+  evaluation: {
+    datasets: { name: string; role: DatasetRole; note?: string }[];
+    split: string;
+    metrics: string[];
+    /** Train/test procedure, and anything that limits what the numbers mean. */
+    protocolNotes?: string[];
+  };
+}
+
 export interface StudyModule {
   slug: string;
   /** The problem the paper sets out to solve, in two or three sentences. */
@@ -46,4 +114,6 @@ export interface StudyModule {
   /** Headline numbers, e.g. { label: "RWF-2000", value: "87.3%", note: "accuracy" }. */
   results?: { label: string; value: string; note?: string }[];
   concepts: Concept[];
+  /** The comparable extraction. Optional so papers can be added one at a time. */
+  review?: ReviewProfile;
 }

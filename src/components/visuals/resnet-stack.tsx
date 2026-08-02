@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { cn } from "@/lib/utils";
+import { cn, hueColor } from "@/lib/utils";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import {
   ControlGroup,
@@ -12,6 +12,7 @@ import {
   SegmentedControl,
   WebGLFallback,
 } from "./controls";
+import { HoverFrame, useSceneHover, type SceneHover } from "./hover";
 import { SceneCanvas, useFitScale } from "./scene-canvas";
 
 export interface Stage {
@@ -60,9 +61,10 @@ export function ResnetStack({
   freeze = [],
   freezeSource = "kineticsMit",
 }: ResnetStackProps) {
-  const accent = `hsl(${hue} 78% 62%)`;
+  const accent = hueColor(hue);
   const [source, setSource] = useState<Source>(freezeSource);
   const [frozen, setFrozen] = useState(0);
+  const { frame, hover, hovered } = useSceneHover();
 
   // Freezing is only meaningful with pre-trained weights, and papers measure it
   // for a single source, so every other combination is honestly unmeasured.
@@ -81,13 +83,18 @@ export function ResnetStack({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1">
-        <SceneCanvas camera={[0.4, 1.9, 7.2]} fov={40} fallback={<WebGLFallback />}>
+      <HoverFrame frame={frame} hovered={hovered}>
+        <SceneCanvas
+          camera={[0.4, 1.9, 7.2]}
+          fov={40}
+          fallback={<WebGLFallback />}
+          orbit
+        >
           <ambientLight intensity={0.6} />
           <directionalLight position={[3, 5, 6]} intensity={1.05} />
-          <Backbone stages={stages} frozen={frozen} hue={hue} />
+          <Backbone stages={stages} frozen={frozen} hue={hue} hover={hover} />
         </SceneCanvas>
-      </div>
+      </HoverFrame>
 
       <ControlRow>
         <SegmentedControl<Source>
@@ -161,10 +168,12 @@ function Backbone({
   stages,
   frozen,
   hue,
+  hover,
 }: {
   stages: Stage[];
   frozen: number;
   hue: number;
+  hover: SceneHover;
 }) {
   const forward = useRef<THREE.Mesh>(null);
   const backward = useRef<THREE.Mesh>(null);
@@ -203,9 +212,11 @@ function Backbone({
     return { placed, left: -total / 2, right: total / 2, width: total };
   }, [stages]);
 
-  const liveColor = useMemo(() => new THREE.Color(`hsl(${hue}, 70%, 55%)`), [hue]);
-  const frozenColor = useMemo(() => new THREE.Color(`hsl(${hue}, 8%, 34%)`), [hue]);
-  const pulseColor = useMemo(() => new THREE.Color(`hsl(${hue}, 95%, 74%)`), [hue]);
+  const liveColor = useMemo(() => new THREE.Color(`hsl(${hue}, 58%, 52%)`), [hue]);
+  // A frozen stage should read as inert, which on a light stage means draining
+  // it toward the panel rather than darkening it.
+  const frozenColor = useMemo(() => new THREE.Color(`hsl(${hue}, 6%, 78%)`), [hue]);
+  const pulseColor = useMemo(() => new THREE.Color(`hsl(${hue}, 88%, 40%)`), [hue]);
 
   // Gradients flow back only as far as the first stage that still trains.
   const gradientStop =
@@ -230,9 +241,19 @@ function Backbone({
     <group rotation={[0.12, -0.5, 0]} scale={scale}>
       {layout.placed.map((box, index) => {
         const isFrozen = index < frozen;
+        const stage = stages[index];
+        const label = `${stage.name} · ${stage.channels} filters · ${
+          isFrozen ? "frozen, no gradient reaches it" : "trainable"
+        }`;
         return (
           <group key={stages[index].name} position={[box.x, 0, 0]}>
-            <mesh>
+            <mesh
+              onPointerMove={(event) => {
+                event.stopPropagation();
+                hover.show(label, event);
+              }}
+              onPointerOut={hover.hide}
+            >
               <boxGeometry args={[box.thickness, box.cross, box.cross]} />
               <meshStandardMaterial
                 color={isFrozen ? frozenColor : liveColor}
@@ -244,7 +265,7 @@ function Backbone({
             </mesh>
             {isFrozen && (
               <lineSegments geometry={box.outline}>
-                <lineBasicMaterial color="#848a94" />
+                <lineBasicMaterial color="#8b919b" />
               </lineSegments>
             )}
           </group>
@@ -252,15 +273,36 @@ function Backbone({
       })}
 
       {/* Data going forward, always the full depth of the network. */}
-      <mesh ref={forward} position={[layout.left, 1.9, 0]}>
+      <mesh
+        ref={forward}
+        position={[layout.left, 1.9, 0]}
+        onPointerMove={(event) => {
+          event.stopPropagation();
+          hover.show("forward pass · activations, every stage", event);
+        }}
+        onPointerOut={hover.hide}
+      >
         <sphereGeometry args={[0.13, 16, 16]} />
         <meshBasicMaterial color={pulseColor} />
       </mesh>
 
       {/* Gradients coming back, halted by whatever is frozen. */}
-      <mesh ref={backward} position={[layout.right, -1.9, 0]}>
+      <mesh
+        ref={backward}
+        position={[layout.right, -1.9, 0]}
+        onPointerMove={(event) => {
+          event.stopPropagation();
+          hover.show(
+            frozen > 0
+              ? `backward pass · gradients stop at ${stages[frozen - 1].name}`
+              : "backward pass · gradients reach every stage",
+            event,
+          );
+        }}
+        onPointerOut={hover.hide}
+      >
         <sphereGeometry args={[0.13, 16, 16]} />
-        <meshBasicMaterial color={frozen > 0 ? "#fb7185" : pulseColor} />
+        <meshBasicMaterial color={frozen > 0 ? "#be123c" : pulseColor} />
       </mesh>
     </group>
   );

@@ -5,9 +5,10 @@ import type { Paper } from "@/types/paper";
 import type { StudyModule } from "@/types/study";
 import { cn, hueColor } from "@/lib/utils";
 import { PdfPanel } from "./pdf-panel";
+import { ReviewPanel } from "./review-panel";
 import { VisualStage } from "./visual-stage";
 
-type Tab = "study" | "pdf";
+type Tab = "study" | "review" | "pdf";
 
 /**
  * The per-paper study view. Concept content is data, not code — see
@@ -34,6 +35,11 @@ export function StudyShell({
         <TabButton active={tab === "study"} onClick={() => setTab("study")}>
           Study
         </TabButton>
+        {studyModule?.review && (
+          <TabButton active={tab === "review"} onClick={() => setTab("review")}>
+            Review extraction
+          </TabButton>
+        )}
         <TabButton active={tab === "pdf"} onClick={() => setTab("pdf")}>
           Read the paper
         </TabButton>
@@ -41,6 +47,8 @@ export function StudyShell({
 
       {tab === "pdf" ? (
         <PdfPanel paper={paper} page={active?.pdfPage} />
+      ) : tab === "review" && studyModule?.review ? (
+        <ReviewPanel review={studyModule.review} accent={accent} />
       ) : studyModule && active ? (
         <div className="grid gap-8 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
           <ConceptRail

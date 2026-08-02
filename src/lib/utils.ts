@@ -12,7 +12,15 @@ export function formatAuthors(authors: string[]): string {
   return `${last(authors[0])} et al.`;
 }
 
-/** CSS color derived from a paper's base hue, used for cards and 3D accents. */
-export function hueColor(hue: number, saturation = 78, lightness = 62): string {
+/**
+ * CSS color derived from a paper's base hue, used for cards and 3D accents.
+ *
+ * The default lightness is set for text and thin borders on a white panel, and
+ * is deliberately dark: these hues span the full circle, and yellow-greens go
+ * illegible several stops before blues do, so the ceiling is set by the worst
+ * hue in `papers.ts` rather than the average. It also has to carry `text-void`
+ * when used as a button fill.
+ */
+export function hueColor(hue: number, saturation = 60, lightness = 30): string {
   return `hsl(${hue} ${saturation}% ${lightness}%)`;
 }

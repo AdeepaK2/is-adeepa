@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { seededRandom } from "@/lib/random";
-import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { hueColor } from "@/lib/utils";
 import {
   ControlRow,
   RangeWindow,
@@ -12,6 +12,7 @@ import {
   SegmentedControl,
   WebGLFallback,
 } from "./controls";
+import { HoverFrame, useSceneHover, type SceneHover } from "./hover";
 import { SceneCanvas, useFitScale } from "./scene-canvas";
 
 /** Accuracies measured for one configuration, per pre-training source. */
@@ -65,13 +66,14 @@ export function SequenceTimeline({
   custom = [],
   videowise = [],
 }: SequenceTimelineProps) {
-  const accent = `hsl(${hue} 78% 62%)`;
+  const accent = hueColor(hue);
 
   const [strategy, setStrategy] = useState<Strategy>("custom");
   const [pretrained, setPretrained] = useState<Pretrained>("kineticsMit");
   const [range, setRange] = useState(() => pickDefaultRange(custom, totalFrames));
   const [randomCount, setRandomCount] = useState(() => random[0]?.frames ?? 50);
   const [scatterCount, setScatterCount] = useState(() => videowise[0]?.frames ?? 50);
+  const { frame, hover, hovered } = useSceneHover();
 
   const selected = useMemo(() => {
     if (strategy === "custom") return contiguous(range.start, range.end, totalFrames);
@@ -101,13 +103,23 @@ export function SequenceTimeline({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1">
-        <SceneCanvas camera={[0, 2.1, 7.6]} fov={40} fallback={<WebGLFallback />}>
+      <HoverFrame frame={frame} hovered={hovered}>
+        <SceneCanvas
+          camera={[0, 2.1, 7.6]}
+          fov={40}
+          fallback={<WebGLFallback />}
+          orbit
+        >
           <ambientLight intensity={0.6} />
           <directionalLight position={[3, 6, 6]} intensity={1} />
-          <Filmstrip total={totalFrames} selected={selected} hue={hue} />
+          <Filmstrip
+            total={totalFrames}
+            selected={selected}
+            hue={hue}
+            hover={hover}
+          />
         </SceneCanvas>
-      </div>
+      </HoverFrame>
 
       <ControlRow>
         <SegmentedControl<Strategy>
@@ -213,14 +225,14 @@ function Filmstrip({
   total,
   selected,
   hue,
+  hover,
 }: {
   total: number;
   selected: Set<number>;
   hue: number;
+  hover: SceneHover;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
-  const group = useRef<THREE.Group>(null);
-  const reduced = useReducedMotion();
 
   const matrices = useMemo(() => {
     const step = STRIP_LENGTH / Math.max(total - 1, 1);
@@ -232,13 +244,15 @@ function Filmstrip({
     });
   }, [total]);
 
-  const dimColor = useMemo(() => new THREE.Color(`hsl(${hue}, 22%, 26%)`), [hue]);
-  const litColor = useMemo(() => new THREE.Color(`hsl(${hue}, 92%, 68%)`), [hue]);
+  // Unsampled frames recede toward the panel; sampled ones are the dark,
+  // saturated end of the ramp. See the note in `volume-grid`.
+  const dimColor = useMemo(() => new THREE.Color(`hsl(${hue}, 16%, 85%)`), [hue]);
+  const litColor = useMemo(() => new THREE.Color(`hsl(${hue}, 82%, 44%)`), [hue]);
 
   // The strip is wide; shrink it rather than letting the ends fall out of frame.
   const scale = useFitScale(STRIP_LENGTH * 1.15, 3.4);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const instanced = mesh.current;
     if (!instanced) return;
 
@@ -248,17 +262,26 @@ function Filmstrip({
     }
     instanced.instanceMatrix.needsUpdate = true;
     if (instanced.instanceColor) instanced.instanceColor.needsUpdate = true;
-
-    if (group.current) {
-      group.current.rotation.y = reduced
-        ? -0.42
-        : -0.42 + Math.sin(clock.getElapsedTime() * 0.2) * 0.12;
-    }
   });
 
   return (
-    <group ref={group} rotation={[0, -0.42, 0]} scale={scale}>
-      <instancedMesh ref={mesh} args={[undefined, undefined, total]}>
+    <group rotation={[0, -0.42, 0]} scale={scale}>
+      <instancedMesh
+        ref={mesh}
+        args={[undefined, undefined, total]}
+        onPointerMove={(event) => {
+          event.stopPropagation();
+          const index = event.instanceId;
+          if (index === undefined) return;
+          hover.show(
+            `frame ${index + 1} of ${total} · ${
+              selected.has(index) ? "sampled" : "not sampled"
+            }`,
+            event,
+          );
+        }}
+        onPointerOut={hover.hide}
+      >
         <boxGeometry args={[STRIP_LENGTH / total / 1.6, 1.9, 2.6]} />
         <meshStandardMaterial roughness={0.5} metalness={0.05} />
       </instancedMesh>

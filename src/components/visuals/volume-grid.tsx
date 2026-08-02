@@ -4,7 +4,9 @@ import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { hueColor } from "@/lib/utils";
 import { ControlRow, SegmentedControl, WebGLFallback } from "./controls";
+import { HoverFrame, useSceneHover, type SceneHover } from "./hover";
 import { SceneCanvas } from "./scene-canvas";
 
 /** Whether the kernel has any extent along the time axis. */
@@ -46,25 +48,51 @@ export function VolumeGrid({
   interactive = false,
 }: VolumeGridProps) {
   const [reach, setReach] = useState<Reach>("3d");
-  const accent = `hsl(${hue} 78% 62%)`;
+  const accent = hueColor(hue);
+  const { frame, hover, hovered } = useSceneHover();
 
   const scene = (
-    <SceneCanvas camera={[5.2, 3.4, 6.2]} fov={40} fallback={<WebGLFallback />}>
+    <SceneCanvas
+      camera={[5.2, 3.4, 6.2]}
+      fov={40}
+      fallback={<WebGLFallback />}
+      orbit
+      autoRotate
+    >
       <ambientLight intensity={0.55} />
       <directionalLight position={[4, 6, 5]} intensity={1.1} />
       {mode === "kernel" ? (
-        <KernelSweep size={size} hue={hue} speed={speed} kernel={kernel} reach={reach} />
+        <KernelSweep
+          size={size}
+          hue={hue}
+          speed={speed}
+          kernel={kernel}
+          reach={reach}
+          hover={hover}
+        />
       ) : (
-        <Lattice size={size} hue={hue} speed={speed} />
+        <Lattice size={size} hue={hue} speed={speed} hover={hover} />
       )}
     </SceneCanvas>
   );
 
-  if (!interactive || mode !== "kernel") return scene;
+  // Still a flex column with no controls, so `HoverFrame` sizes the same way in
+  // both branches rather than collapsing to its content.
+  if (!interactive || mode !== "kernel") {
+    return (
+      <div className="flex h-full flex-col">
+        <HoverFrame frame={frame} hovered={hovered}>
+          {scene}
+        </HoverFrame>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1">{scene}</div>
+      <HoverFrame frame={frame} hovered={hovered}>
+        {scene}
+      </HoverFrame>
       <ControlRow>
         <SegmentedControl<Reach>
           label="Kernel"
@@ -126,15 +154,18 @@ function Lattice({
   size,
   hue,
   speed,
-}: Required<Pick<VolumeGridProps, "size" | "hue" | "speed">>) {
+  hover,
+}: Required<Pick<VolumeGridProps, "size" | "hue" | "speed">> & {
+  hover: SceneHover;
+}) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const reduced = useReducedMotion();
   const { matrices, coords } = useLattice(size);
   const count = matrices.length;
   const nz = size[2];
 
-  const baseColor = useMemo(() => new THREE.Color(`hsl(${hue}, 70%, 55%)`), [hue]);
-  const litColor = useMemo(() => new THREE.Color(`hsl(${hue}, 95%, 72%)`), [hue]);
+  const baseColor = useMemo(() => new THREE.Color(`hsl(${hue}, 38%, 76%)`), [hue]);
+  const litColor = useMemo(() => new THREE.Color(`hsl(${hue}, 78%, 45%)`), [hue]);
 
   useFrame(({ clock }) => {
     const instanced = mesh.current;
@@ -157,7 +188,17 @@ function Lattice({
     instanced.rotation.y = reduced ? 0.4 : clock.getElapsedTime() * 0.12;
   });
 
-  return <Voxels meshRef={mesh} count={count} />;
+  return (
+    <Voxels
+      meshRef={mesh}
+      count={count}
+      hover={hover}
+      label={(index) => {
+        const [x, y, z] = coords[index];
+        return `frame ${z + 1} of ${nz} · pixel ${x + 1},${y + 1}`;
+      }}
+    />
+  );
 }
 
 /**
@@ -171,12 +212,16 @@ function KernelSweep({
   speed,
   kernel,
   reach,
+  hover,
 }: Required<Pick<VolumeGridProps, "size" | "hue" | "speed" | "kernel">> & {
   reach: Reach;
+  hover: SceneHover;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const box = useRef<THREE.LineSegments>(null);
-  const group = useRef<THREE.Group>(null);
+  // Where the kernel is right now, so a hovered voxel can say whether it is
+  // currently under it. A ref rather than state: this changes every frame.
+  const centre = useRef({ cx: 0, cy: 0, cz: 0 });
   const reduced = useReducedMotion();
 
   const [nx, ny, nz] = size;
@@ -186,9 +231,11 @@ function KernelSweep({
   const [kx, ky, kz] = kernel;
   const depth = reach === "3d" ? kz : 1;
 
-  const dimColor = useMemo(() => new THREE.Color(`hsl(${hue}, 30%, 24%)`), [hue]);
-  const sliceColor = useMemo(() => new THREE.Color(`hsl(${hue}, 55%, 40%)`), [hue]);
-  const litColor = useMemo(() => new THREE.Color(`hsl(${hue}, 95%, 72%)`), [hue]);
+  // On a light stage the recessed state is the pale one: voxels the kernel is
+  // not touching have to fall back toward the panel, not stand out against it.
+  const dimColor = useMemo(() => new THREE.Color(`hsl(${hue}, 20%, 84%)`), [hue]);
+  const sliceColor = useMemo(() => new THREE.Color(`hsl(${hue}, 42%, 66%)`), [hue]);
+  const litColor = useMemo(() => new THREE.Color(`hsl(${hue}, 85%, 42%)`), [hue]);
 
   const edges = useMemo(
     () =>
@@ -198,7 +245,7 @@ function KernelSweep({
     [kx, ky, depth, step],
   );
 
-  const centre = (index: number, extent: number) => (index - (extent - 1) / 2) * step;
+  const offset = (index: number, extent: number) => (index - (extent - 1) / 2) * step;
 
   useFrame(({ clock }) => {
     const instanced = mesh.current;
@@ -209,6 +256,7 @@ function KernelSweep({
     const cx = t % nx;
     const cy = Math.floor(t / nx) % ny;
     const cz = Math.floor(t / (nx * ny)) % nz;
+    centre.current = { cx, cy, cz };
 
     const color = new THREE.Color();
     for (let i = 0; i < count; i++) {
@@ -227,18 +275,32 @@ function KernelSweep({
     instanced.instanceMatrix.needsUpdate = true;
     if (instanced.instanceColor) instanced.instanceColor.needsUpdate = true;
 
-    box.current?.position.set(centre(cx, nx), centre(cy, ny), centre(cz, nz));
-    // A slow sway rather than a full spin -- the kernel stays trackable.
-    if (group.current) {
-      group.current.rotation.y = reduced
-        ? 0.35
-        : 0.35 + Math.sin(clock.getElapsedTime() * 0.18) * 0.22;
-    }
+    box.current?.position.set(offset(cx, nx), offset(cy, ny), offset(cz, nz));
   });
 
+  // The scene used to sway on its own for depth. The camera is the viewer's now
+  // -- a subject that also moves makes a drag impossible to aim.
   return (
-    <group ref={group}>
-      <Voxels meshRef={mesh} count={count} />
+    <group rotation={[0, 0.35, 0]}>
+      <Voxels
+        meshRef={mesh}
+        count={count}
+        hover={hover}
+        label={(index) => {
+          const [x, y, z] = coords[index];
+          const { cx, cy, cz } = centre.current;
+          const inside =
+            Math.abs(x - cx) < kx / 2 &&
+            Math.abs(y - cy) < ky / 2 &&
+            Math.abs(z - cz) < depth / 2;
+          const state = inside
+            ? "under the kernel"
+            : z === Math.round(cz)
+              ? "current frame, outside the kernel"
+              : "not being read";
+          return `frame ${z + 1} of ${nz} · pixel ${x + 1},${y + 1} · ${state}`;
+        }}
+      />
       <lineSegments ref={box} geometry={edges}>
         <lineBasicMaterial color={litColor} transparent opacity={0.9} />
       </lineSegments>
@@ -249,12 +311,26 @@ function KernelSweep({
 function Voxels({
   meshRef,
   count,
+  hover,
+  label,
 }: {
   meshRef: React.RefObject<THREE.InstancedMesh | null>;
   count: number;
+  hover: SceneHover;
+  /** Built per hover rather than up front -- it reads the live kernel position. */
+  label: (index: number) => string;
 }) {
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+    <instancedMesh
+      ref={meshRef}
+      args={[undefined, undefined, count]}
+      onPointerMove={(event) => {
+        event.stopPropagation();
+        if (event.instanceId === undefined) return;
+        hover.show(label(event.instanceId), event);
+      }}
+      onPointerOut={hover.hide}
+    >
       <boxGeometry args={[0.3, 0.3, 0.3]} />
       <meshStandardMaterial roughness={0.45} metalness={0.1} transparent opacity={0.9} />
     </instancedMesh>

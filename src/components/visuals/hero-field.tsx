@@ -65,9 +65,9 @@ function FrameStack() {
           >
             <lineBasicMaterial
               // The frontmost frame is the "current" one and reads as the accent.
-              color={i === FRAME_COUNT - 1 ? "#5eead4" : "#818894"}
+              color={i === FRAME_COUNT - 1 ? "#0f766e" : "#7d848f"}
               transparent
-              opacity={0.2 + depth * 0.7}
+              opacity={0.22 + depth * 0.62}
             />
           </lineSegments>
         );
@@ -118,13 +118,15 @@ function FeaturePoints() {
   return (
     <points ref={points} geometry={geometry}>
       <pointsMaterial
-        color="#5eead4"
+        color="#0f766e"
         size={0.042}
         sizeAttenuation
         transparent
-        opacity={0.85}
+        opacity={0.7}
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        // Normal, not additive: additive blending brightens toward white, which
+        // on a light page means the points erase themselves.
+        blending={THREE.NormalBlending}
       />
     </points>
   );

@@ -28,6 +28,99 @@ export const module3dCnn: StudyModule = {
     { label: "Cost", value: "66.6 M", note: "parameters, ~5 FPS" },
   ],
 
+  review: {
+    architecture: {
+      family: "Two-stream 3D CNN",
+      backbone: "3D ResNet-18, one instance per stream, not weight-shared",
+      motionEncoding:
+        "Twice over, by two different routes. Implicitly, through 3×3×3 kernels that span three frames at a time, so a single activation already encodes short-range change. Explicitly, through a second stream fed pre-computed dense optical flow, so displacement is handed to the network rather than learned.",
+      inputs: [
+        "RGB frames, 3 channels, 112×112, extracted at 224×224 and cropped",
+        "Dense optical flow, 2 channels (horizontal and vertical), OpenCV, pre-computed",
+      ],
+      fusion:
+        "Late. Each stream produces class scores, the two vectors are summed, softmax runs on the sum. No shared layers, no learned fusion weights, no joint training.",
+      supervision: "Supervised binary classification, whole clip, fight / non-fight",
+      notes: [
+        "The streams differ only at the input convolution -- 3 channels against 2. Everything after it is identical.",
+        "The named contribution is not architectural. The custom spatiotemporal crop is a data-augmentation policy: fix a start and end frame instead of sampling randomly. It only applies to clips of uniform, known length.",
+        "Stem is 7×7×7, 64 filters, stride 1 in time and 2 in space; every residual stage is 3×3×3.",
+      ],
+    },
+
+    attention: {
+      used: false,
+      kinds: ["none"],
+      notes: [
+        "No attention module anywhere in the proposed model -- no channel, spatial, temporal or self-attention. Every mention of attention in the paper is in Related Works, describing other people's models.",
+        "Worth holding onto as a baseline for the attention axis: this is what a plain 3D CNN reaches on RWF-2000 with no attention at all, so any attention paper's gain can be read against it.",
+        "The closest thing to a selection mechanism is the crop, which fixes which frames are read before training rather than learning where to look. That is a hard, hand-set prior, not attention.",
+      ],
+    },
+
+    efficiency: {
+      parameters: "66.6 M",
+      flops: undefined,
+      modelSize: undefined,
+      throughput: "≈5 FPS",
+      hardware: "Intel Core i7-8700 @ 2.90 GHz (CPU; no GPU reported)",
+      realTime: {
+        status: "measured-and-refuted",
+        note: "Section 3.3 says the trained model 'can be used for real-time violence video classification', but the paper's own Table 9 measures 5 FPS against the Flow Gated Network's 94.7. The authors do not repeat the real-time claim in the results, and instead concede the model still needs to be made faster and smaller, naming post-training pruning as the candidate.",
+      },
+      edgeDeployment: {
+        status: "not-addressed",
+        note: "No edge, embedded or on-camera deployment is discussed anywhere. No power, memory-footprint or accelerator figures are given, and the only hardware named is a desktop CPU.",
+      },
+      notes: [
+        "Table 9 heads its parameter column 'Params (MB)' while the body text says millions of parameters. Read the column as millions -- 66.6 M against the Flow Gated Network's 0.27 M.",
+        "That is roughly 250× the parameters and 20× the latency of the model it beats by 3.25 points, and 0.75 over the best result in its own comparison table.",
+        "Cost is structural, not incidental: two full 3D backbones, plus optical flow computed for every clip before inference. The flow pre-processing is not costed anywhere in the paper.",
+        "Table 8 and Table 9 disagree on the same baseline -- Cheng et al. is 87.25% in one and 87.5% in the other, and I3D flow-only is 75.5 against 75.75.",
+      ],
+    },
+
+    evaluation: {
+      datasets: [
+        {
+          name: "RWF-2000",
+          role: "evaluation",
+          note: "The only dataset any result is reported on. 2,000 clips scraped from YouTube, 5 s at 30 fps, surveillance-camera perspective, binary fight / non-fight.",
+        },
+        {
+          name: "Kinetics-700",
+          role: "pre-training",
+          note: "700 action classes, ~650,000 clips. Worth +4.5 points on its own.",
+        },
+        {
+          name: "Moments in Time",
+          role: "pre-training",
+          note: "339 classes, over 1,000,000 clips. Combined with Kinetics gives 1,039 classes and the paper's best RGB result.",
+        },
+        {
+          name: "Crowd Violence",
+          role: "mentioned-only",
+          note: "Named in the introduction and related work as an existing dataset. No experiment is run on it.",
+        },
+        {
+          name: "UCF-Crime",
+          role: "mentioned-only",
+          note: "Named in the introduction and related work as an existing dataset. No experiment is run on it.",
+        },
+      ],
+      split:
+        "The dataset's own 80/20 split -- 1,600 training clips, 400 held out. Evaluated as 40 batches of 10, full 149-frame clips, centre spatial crop.",
+      metrics: ["Accuracy"],
+      protocolNotes: [
+        "Accuracy is the only metric reported. No precision, recall, F1, AUC, confusion matrix or per-class breakdown appears anywhere, so nothing can be said about the false-positive behaviour that matters most for an alarm.",
+        "The held-out 400 clips are called the validation set and are also the only set results are reported on. There is no separate test set, and the crop window and pre-training source were chosen by comparing on these same clips -- so the headline 90.5% is a selected-best number, not a clean held-out one.",
+        "Every single run reaches 100% training accuracy while validation plateaus 10-20 points below. The authors acknowledge the overfitting; it means only the validation column carries information.",
+        "No cross-dataset test. Nothing establishes that the 49-149 crop transfers to any footage other than RWF-2000's uniformly cut 5-second clips, and the authors are careful to say the window locates useful frames, not the violence itself.",
+        "Among the common benchmarks this is the closest to operational CCTV -- surveillance-perspective, uncurated, variable resolution -- which makes it a relatively strong choice of evaluation context even though only one dataset is used.",
+      ],
+    },
+  },
+
   concepts: [
     {
       id: "volume",

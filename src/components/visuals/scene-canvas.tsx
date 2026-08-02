@@ -1,8 +1,10 @@
 "use client";
 
 import { Canvas, useThree } from "@react-three/fiber";
-import { Component, Suspense } from "react";
+import { OrbitControls } from "@react-three/drei";
+import { Component, Suspense, useState } from "react";
 import type { ErrorInfo, ReactNode } from "react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 /**
  * Uniform scale that keeps a scene of the given world size inside the canvas.
@@ -27,6 +29,10 @@ interface SceneCanvasProps {
   className?: string;
   /** Shown when WebGL is unavailable or the scene throws. */
   fallback?: ReactNode;
+  /** Let the viewer drag to turn the camera around the scene. */
+  orbit?: boolean;
+  /** Turn slowly until the viewer takes over. Requires `orbit`. */
+  autoRotate?: boolean;
 }
 
 /**
@@ -44,6 +50,8 @@ export function SceneCanvas({
   fov = 45,
   className,
   fallback = null,
+  orbit = false,
+  autoRotate = false,
 }: SceneCanvasProps) {
   return (
     <WebGLBoundary fallback={fallback}>
@@ -54,8 +62,43 @@ export function SceneCanvas({
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>{children}</Suspense>
+        {orbit && <Orbit autoRotate={autoRotate} />}
       </Canvas>
     </WebGLBoundary>
+  );
+}
+
+/**
+ * Drag to turn the camera around the scene.
+ *
+ * Zoom is off: these scenes sit inline in a page people scroll through, and a
+ * wheel handler over a full-width canvas swallows the scroll they meant for the
+ * document. Panning is off for the same reason a scene cannot be lost -- there
+ * is no way to drag the subject out of frame and be stuck.
+ *
+ * The idle turn is what tells a reader the scene can be turned at all, so it
+ * runs until the first drag and then never resumes.
+ */
+function Orbit({ autoRotate }: { autoRotate: boolean }) {
+  const reduced = useReducedMotion();
+  const [idle, setIdle] = useState(true);
+
+  return (
+    <OrbitControls
+      makeDefault
+      enablePan={false}
+      enableZoom={false}
+      enableDamping
+      dampingFactor={0.08}
+      rotateSpeed={0.55}
+      autoRotate={autoRotate && idle && !reduced}
+      autoRotateSpeed={0.4}
+      onStart={() => setIdle(false)}
+      // Stop short of the poles, where the scene would roll over and read as
+      // upside down with no horizon to explain why.
+      minPolarAngle={Math.PI * 0.12}
+      maxPolarAngle={Math.PI * 0.88}
+    />
   );
 }
 

@@ -1,23 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  /* Surfaces, darkest to lightest. Neutral gray rather than blue-black. */
-  --color-void: #16181c;
-  --color-base: #1c1f24;
-  --color-panel: #24272d;
-  --color-raised: #2e3138;
-  --color-line: #3b3f47;
-  --color-line-strong: #50555f;
+  /*
+   * Surfaces, ordered by depth rather than by lightness: `void` is the most
+   * recessed (the visual stage, ambient sections), `raised` the most elevated.
+   * On a light theme that means `panel` is the white card and `void` is a gray
+   * well, which is the inverse of the dark ordering -- the names still describe
+   * position in the stack, so component classes did not have to change.
+   * Neutral gray with a trace of blue, never a warm off-white.
+   */
+  --color-void: #e6e8ed;
+  --color-base: #f3f4f6;
+  --color-panel: #ffffff;
+  --color-raised: #e9ebef;
+  --color-line: #d6d9e0;
+  --color-line-strong: #b2b7c1;
 
-  /* Text. */
-  --color-ink: #f0f1f3;
-  --color-ink-muted: #b0b5be;
-  --color-ink-faint: #848a94;
+  /* Text. Muted and faint both clear 4.5:1 on `base`. */
+  --color-ink: #171a1e;
+  --color-ink-muted: #474d56;
+  --color-ink-faint: #616872;
 
-  /* Accents. */
-  --color-signal: #5eead4;
-  --color-signal-dim: #2dd4bf;
-  --color-alert: #fb7185;
+  /*
+   * Accents. Dark enough to read as text on `panel` and to carry light text
+   * when used as a fill -- `signal-dim` is the hover state, so it deepens
+   * rather than lightens.
+   */
+  --color-signal: #0f766e;
+  --color-signal-dim: #115e59;
+  --color-alert: #be123c;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -26,7 +37,7 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   scroll-behavior: smooth;
 }
 
