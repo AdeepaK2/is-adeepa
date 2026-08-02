@@ -15,6 +15,17 @@ const nextConfig: NextConfig = {
    * supports Next.js instead.
    */
   output: "export",
+
+  /**
+   * Export each route as `<route>/index.html` rather than `<route>.html`.
+   *
+   * The export also writes RSC payloads to `papers/<slug>/__next.*.txt`, so the
+   * deploy manifest contains entries under `papers/<slug>/` either way. Without
+   * this, `papers/<slug>` is both a directory prefix and a sibling `.html` file,
+   * and which one a host resolves for the clean URL is left to that host. With
+   * it, the directory has a real index and there is nothing to resolve.
+   */
+  trailingSlash: true,
 };
 
 export default nextConfig;
