@@ -1,0 +1,17 @@
+# Netlify build settings.
+#
+# This file wins over anything set in the Netlify UI, so the deploy is
+# reproducible from the repo rather than from dashboard state.
+#
+# `next build` with `output: "export"` in next.config.ts writes a plain static
+# site to `out/`. Netlify serves `out/papers/3d-cnn.html` for the clean URL
+# `/papers/3d-cnn` and uses `out/404.html` for misses, both without extra rules.
+
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  # Next.js 16 needs Node 20+. Pinned so a change to Netlify's default image
+  # cannot quietly move the build off a version this is known to build on.
+  NODE_VERSION = "22"
