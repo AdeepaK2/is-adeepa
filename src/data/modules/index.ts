@@ -1,6 +1,7 @@
 import type { StudyModule } from "@/types/study";
 import { module3dCnn } from "./3d-cnn";
 import { moduleAirtlab } from "./airtlab-deep-learning";
+import { moduleKianNet } from "./kiannet-cnn-lstm";
 import { moduleMultiFrameFusion } from "./multi-frame-feature-fusion";
 
 /**
@@ -17,6 +18,7 @@ import { moduleMultiFrameFusion } from "./multi-frame-feature-fusion";
 export const studyModules: Record<string, StudyModule> = {
   "3d-cnn": module3dCnn,
   "airtlab-deep-learning": moduleAirtlab,
+  "kiannet-cnn-lstm": moduleKianNet,
   "multi-frame-feature-fusion": moduleMultiFrameFusion,
 };
 

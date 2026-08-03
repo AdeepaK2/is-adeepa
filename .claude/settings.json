@@ -22,7 +22,10 @@
       "Bash(/private/tmp/claude-501/-Users-adeepak-Developer-Learn/60504c53-cb02-4dae-ad3e-78575e7a5af7/scratchpad/v/bin/python3 -c ' *)",
       "Bash(grep -vE \"^\\\\s*$\")",
       "Bash(curl -s http://localhost:3000/papers/multi-frame-feature-fusion/)",
-      "Bash(curl -s http://localhost:3000/papers/3d-cnn/)"
+      "Bash(curl -s http://localhost:3000/papers/3d-cnn/)",
+      "Bash(python3 -m venv /private/tmp/claude-501/-Users-adeepak-Developer-Learn/6a7788c7-6052-4643-ae10-3a69a3724ce2/scratchpad/v)",
+      "Bash(/private/tmp/claude-501/-Users-adeepak-Developer-Learn/6a7788c7-6052-4643-ae10-3a69a3724ce2/scratchpad/v/bin/python3 -c ' *)",
+      "Bash(/private/tmp/claude-501/-Users-adeepak-Developer-Learn/6a7788c7-6052-4643-ae10-3a69a3724ce2/scratchpad/v/bin/pip -q install pymupdf)"
     ]
   }
 }

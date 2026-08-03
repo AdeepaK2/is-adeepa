@@ -22,10 +22,14 @@ export const papers: Paper[] = [
     summary:
       "A CNN reads each frame, an LSTM carries the story across frames, and attention decides which moments deserve weight — the classic recipe, tuned for surveillance footage.",
     architecture: "CNN-LSTM",
-    datasets: ["UCF-Crime"],
+    // Results are reported on UCF-Crime (four cuts) and RWF-2000; RWF was
+    // missing here. Hockey Fight, Movies and Crowd Violence appear in the
+    // paper's Table 2 but no experiment is run on any of them -- see the
+    // review extraction, which records that distinction per dataset.
+    datasets: ["UCF-Crime", "RWF-2000"],
     tags: ["LSTM", "attention", "sequence modelling"],
     hue: 320,
-    status: "planned",
+    status: "ready",
   },
   {
     slug: "efficient-realtime-modeling",
