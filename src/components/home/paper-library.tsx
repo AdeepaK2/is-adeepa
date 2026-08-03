@@ -5,7 +5,7 @@ import type { ArchitectureFamily, Paper } from "@/types/paper";
 import { cn } from "@/lib/utils";
 import { PaperCard } from "./paper-card";
 
-type SortKey = "newest" | "oldest" | "title";
+type SortKey = "list" | "newest" | "oldest" | "title";
 
 interface PaperLibraryProps {
   papers: Paper[];
@@ -17,7 +17,7 @@ export function PaperLibrary({ papers, families, datasets }: PaperLibraryProps) 
   const [query, setQuery] = useState("");
   const [family, setFamily] = useState<ArchitectureFamily | null>(null);
   const [dataset, setDataset] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortKey>("newest");
+  const [sort, setSort] = useState<SortKey>("list");
 
   // Only show family chips that survive the other active filters.
   const availableFamilies = useMemo(() => {
@@ -49,8 +49,11 @@ export function PaperLibrary({ papers, families, datasets }: PaperLibraryProps) 
         .includes(needle);
     });
 
+    // "list" keeps the source order of the data file, which is the reading list.
+    if (sort === "list") return matched;
+
     return matched.sort((a, b) => {
-      if (sort === "title") return a.shortTitle.localeCompare(b.shortTitle);
+      if (sort === "title") return a.title.localeCompare(b.title);
       if (sort === "oldest") return a.year - b.year;
       return b.year - a.year;
     });
@@ -236,6 +239,7 @@ function SortSelect({
       aria-label="Sort papers"
       className="border-line bg-panel text-ink-muted focus:border-signal/60 rounded-lg border px-3 py-2 text-sm transition-colors outline-none"
     >
+      <option value="list">Reading list order</option>
       <option value="newest">Newest first</option>
       <option value="oldest">Oldest first</option>
       <option value="title">A–Z</option>

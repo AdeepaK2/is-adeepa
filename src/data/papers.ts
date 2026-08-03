@@ -1,123 +1,30 @@
 import type { ArchitectureFamily, Paper } from "@/types/paper";
 
 /**
- * The paper library. Metadata was taken from each PDF's own front matter.
- * `status: "planned"` means the interactive study module has not been authored
- * yet — the paper still opens, it just shows the PDF and its overview.
+ * The paper library, in IN3901 reading-list order ([1]-[12]) -- the home page
+ * defaults to this sequence, so the array order is meaningful. Metadata was
+ * taken from each PDF's own front matter. `status: "planned"` means the
+ * interactive study module has not been authored yet -- the paper still opens,
+ * it just shows the PDF and its overview.
  */
 export const papers: Paper[] = [
   {
-    slug: "3d-cnn",
+    slug: "kiannet-cnn-lstm",
     title:
-      "Violence recognition on videos using two-stream 3D CNN with custom spatiotemporal crop",
-    shortTitle: "Two-Stream 3D CNN",
-    authors: [
-      "Raka Aditya Pratama",
-      "Novanto Yudistira",
-      "Fitra Abdurrachman Bachtiar",
-    ],
-    venue: "Multimedia Tools and Applications",
-    year: 2024,
-    doi: "10.1007/s11042-023-15599-0",
-    pageCount: 23,
-    pdf: "/papers/3d-cnn.pdf",
-    summary:
-      "Runs RGB frames and optical flow through two parallel 3D CNNs, then adds a custom spatiotemporal crop so the network trains on the region where the action actually happens.",
-    architecture: "Two-Stream",
-    // Results are reported on RWF-2000 only. Crowd Violence and UCF-Crime are
-    // named in the introduction as existing datasets and never run -- see the
-    // review extraction, which records that distinction per dataset.
-    datasets: ["RWF-2000"],
-    tags: ["3D convolution", "optical flow", "data augmentation"],
-    hue: 210,
-    status: "ready",
-  },
-  {
-    slug: "accurate-violence-detection",
-    title:
-      "An accurate violence detection framework using unsupervised spatial–temporal action translation network",
-    shortTitle: "Action Translation Network",
-    authors: [
-      "Tahereh Zarrat Ehsan",
-      "Manoochehr Nahvi",
-      "Seyed Mehdi Mohtavipour",
-    ],
-    venue: "The Visual Computer",
-    year: 2024,
-    doi: "10.1007/s00371-023-02865-3",
-    pageCount: 21,
-    pdf: "/papers/accurate-violence-detection.pdf",
-    summary:
-      "Sidesteps the small-dataset problem by learning without labels: a translation network maps an action's appearance to its motion, and violence shows up as the cases the model cannot reproduce.",
-    architecture: "Unsupervised / Generative",
-    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
-    tags: ["unsupervised", "action translation", "limited data"],
-    hue: 280,
-    status: "planned",
-  },
-  {
-    slug: "ai-violent-incident-detection",
-    title:
-      "AI-based Violent Incident Detection in Surveillance Videos to Enhance Public Safety",
-    shortTitle: "AI Violent Incident Detection",
-    authors: ["Khaled Merit", "Mohammed Beladgham"],
-    venue: "Journal of Telecommunications and Information Technology",
-    year: 2025,
-    doi: "10.26636/jtit.2025.4.2328",
-    pageCount: 13,
-    pdf: "/papers/ai-violent-incident-detection.pdf",
-    summary:
-      "A comparison study: several modern recognition backbones are applied to the same three benchmark sets to see which combination is realistic for an alerting system in the field.",
-    architecture: "3D CNN",
-    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
-    tags: ["benchmark", "early alerting", "public safety"],
-    hue: 12,
-    status: "planned",
-  },
-  {
-    slug: "airtlab-deep-learning",
-    title:
-      "Deep Learning for Automatic Violence Detection: Tests on the AIRTLab Dataset",
-    shortTitle: "AIRTLab Benchmark",
-    authors: [
-      "Paolo Sernani",
-      "Nicola Falcionelli",
-      "Selene Tomassini",
-      "Paolo Contardo",
-      "Aldo Franco Dragoni",
-    ],
+      "KianNet: A Violence Detection Model Using an Attention-Based CNN-LSTM Structure",
+    shortTitle: "KianNet",
+    authors: ["Soheil Vosta", "Kin-Choong Yow"],
     venue: "IEEE Access",
-    year: 2021,
-    doi: "10.1109/ACCESS.2021.3131315",
-    pageCount: 16,
-    pdf: "/papers/airtlab-deep-learning.pdf",
-    summary:
-      "Introduces the AIRTLab dataset, built specifically to expose false positives, and measures how well established detectors hold up when non-violent action looks superficially violent.",
-    architecture: "3D CNN",
-    // RWF-2000 and Movies are discussed in Related Works only; no experiment is
-    // run on either. This lists the three datasets results are reported on.
-    datasets: ["AIRTLab", "Hockey Fight", "Crowd Violence"],
-    tags: ["dataset", "false positives", "evaluation"],
-    hue: 160,
-    status: "ready",
-  },
-  {
-    slug: "cbam-ubi-fights",
-    title:
-      "Violence Detection Enhancement by Involving Convolutional Block Attention Modules Into Various Deep Learning Architectures: Comprehensive Case Study for UBI-Fights Dataset",
-    shortTitle: "CBAM on UBI-Fights",
-    authors: ["Mahmoud Abdelkader Bashery Abbass", "Hyun-Soo Kang"],
-    venue: "IEEE Access",
-    year: 2023,
-    doi: "10.1109/ACCESS.2023.3267409",
+    year: 2024,
+    doi: "10.1109/ACCESS.2023.3339379",
     pageCount: 12,
-    pdf: "/papers/cbam-ubi-fights.pdf",
+    pdf: "/papers/kiannet-cnn-lstm.pdf",
     summary:
-      "Drops the same attention block (CBAM) into a range of backbones and measures what it buys in each, isolating the contribution of attention rather than of the architecture around it.",
-    architecture: "2D CNN + Attention",
-    datasets: ["UBI-Fights"],
-    tags: ["CBAM", "attention", "ablation study"],
-    hue: 45,
+      "A CNN reads each frame, an LSTM carries the story across frames, and attention decides which moments deserve weight — the classic recipe, tuned for surveillance footage.",
+    architecture: "CNN-LSTM",
+    datasets: ["UCF-Crime"],
+    tags: ["LSTM", "attention", "sequence modelling"],
+    hue: 320,
     status: "planned",
   },
   {
@@ -147,44 +54,6 @@ export const papers: Paper[] = [
     status: "planned",
   },
   {
-    slug: "kiannet-cnn-lstm",
-    title:
-      "KianNet: A Violence Detection Model Using an Attention-Based CNN-LSTM Structure",
-    shortTitle: "KianNet",
-    authors: ["Soheil Vosta", "Kin-Choong Yow"],
-    venue: "IEEE Access",
-    year: 2024,
-    doi: "10.1109/ACCESS.2023.3339379",
-    pageCount: 12,
-    pdf: "/papers/kiannet-cnn-lstm.pdf",
-    summary:
-      "A CNN reads each frame, an LSTM carries the story across frames, and attention decides which moments deserve weight — the classic recipe, tuned for surveillance footage.",
-    architecture: "CNN-LSTM",
-    datasets: ["UCF-Crime"],
-    tags: ["LSTM", "attention", "sequence modelling"],
-    hue: 320,
-    status: "planned",
-  },
-  {
-    slug: "lightweight-vit-cbam-lstm",
-    title:
-      "Lightweight Vision Transformer with CBAM and LSTM for Efficient Violence Detection in Image Sequences",
-    shortTitle: "Lightweight ViT + CBAM + LSTM",
-    authors: ["Aishvarya Garg", "Swati Nigam", "Rajiv Singh"],
-    venue: "Signal, Image and Video Processing",
-    year: 2026,
-    doi: "10.1007/s11760-026-05207-7",
-    pageCount: 9,
-    pdf: "/papers/lightweight-vit-cbam-lstm.pdf",
-    summary:
-      "Cuts a Vision Transformer down to a size that can actually be deployed, then leans on CBAM and an LSTM to recover the spatial and temporal detail the smaller model gives up.",
-    architecture: "Vision Transformer",
-    datasets: ["RWF-2000", "Hockey Fight", "AIRTLab"],
-    tags: ["transformer", "CBAM", "lightweight"],
-    hue: 265,
-    status: "planned",
-  },
-  {
     slug: "multi-frame-feature-fusion",
     title: "Multi-frame feature-fusion-based model for violence detection",
     shortTitle: "Multi-Frame Feature Fusion",
@@ -211,23 +80,76 @@ export const papers: Paper[] = [
     status: "ready",
   },
   {
-    slug: "spatio-temporal-model",
+    slug: "airtlab-deep-learning",
     title:
-      "A spatio-temporal model for violence detection based on spatial and temporal attention modules and 2D CNNs",
-    shortTitle: "Spatial + Temporal Attention",
-    authors: ["Javad Mahmoodi", "Hossein Nezamabadi-pour"],
-    venue: "Pattern Analysis and Applications",
-    year: 2024,
-    doi: "10.1007/s10044-024-01265-0",
-    pageCount: 18,
-    pdf: "/papers/spatio-temporal-model.pdf",
+      "Deep Learning for Automatic Violence Detection: Tests on the AIRTLab Dataset",
+    shortTitle: "AIRTLab Benchmark",
+    authors: [
+      "Paolo Sernani",
+      "Nicola Falcionelli",
+      "Selene Tomassini",
+      "Paolo Contardo",
+      "Aldo Franco Dragoni",
+    ],
+    venue: "IEEE Access",
+    year: 2021,
+    doi: "10.1109/ACCESS.2021.3131315",
+    pageCount: 16,
+    pdf: "/papers/airtlab-deep-learning.pdf",
     summary:
-      "Keeps the cheap 2D CNN backbone and adds two attention modules — one choosing where to look in the frame, one choosing when in the clip — to recover 3D-level accuracy.",
-    architecture: "2D CNN + Attention",
-    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
-    tags: ["spatial attention", "temporal attention", "2D CNN"],
-    hue: 25,
+      "Introduces the AIRTLab dataset, built specifically to expose false positives, and measures how well established detectors hold up when non-violent action looks superficially violent.",
+    architecture: "3D CNN",
+    // RWF-2000 and Movies are discussed in Related Works only; no experiment is
+    // run on either. This lists the three datasets results are reported on.
+    datasets: ["AIRTLab", "Hockey Fight", "Crowd Violence"],
+    tags: ["dataset", "false positives", "evaluation"],
+    hue: 160,
+    status: "ready",
+  },
+  {
+    slug: "lightweight-vit-cbam-lstm",
+    title:
+      "Lightweight Vision Transformer with CBAM and LSTM for Efficient Violence Detection in Image Sequences",
+    shortTitle: "Lightweight ViT + CBAM + LSTM",
+    authors: ["Aishvarya Garg", "Swati Nigam", "Rajiv Singh"],
+    venue: "Signal, Image and Video Processing",
+    year: 2026,
+    doi: "10.1007/s11760-026-05207-7",
+    pageCount: 9,
+    pdf: "/papers/lightweight-vit-cbam-lstm.pdf",
+    summary:
+      "Cuts a Vision Transformer down to a size that can actually be deployed, then leans on CBAM and an LSTM to recover the spatial and temporal detail the smaller model gives up.",
+    architecture: "Vision Transformer",
+    datasets: ["RWF-2000", "Hockey Fight", "AIRTLab"],
+    tags: ["transformer", "CBAM", "lightweight"],
+    hue: 265,
     status: "planned",
+  },
+  {
+    slug: "3d-cnn",
+    title:
+      "Violence recognition on videos using two-stream 3D CNN with custom spatiotemporal crop",
+    shortTitle: "Two-Stream 3D CNN",
+    authors: [
+      "Raka Aditya Pratama",
+      "Novanto Yudistira",
+      "Fitra Abdurrachman Bachtiar",
+    ],
+    venue: "Multimedia Tools and Applications",
+    year: 2024,
+    doi: "10.1007/s11042-023-15599-0",
+    pageCount: 23,
+    pdf: "/papers/3d-cnn.pdf",
+    summary:
+      "Runs RGB frames and optical flow through two parallel 3D CNNs, then adds a custom spatiotemporal crop so the network trains on the region where the action actually happens.",
+    architecture: "Two-Stream",
+    // Results are reported on RWF-2000 only. Crowd Violence and UCF-Crime are
+    // named in the introduction as existing datasets and never run -- see the
+    // review extraction, which records that distinction per dataset.
+    datasets: ["RWF-2000"],
+    tags: ["3D convolution", "optical flow", "data augmentation"],
+    hue: 210,
+    status: "ready",
   },
   {
     slug: "spiking-neural-networks",
@@ -270,6 +192,86 @@ export const papers: Paper[] = [
     datasets: ["Hockey Fight"],
     tags: ["edge computing", "deployment", "efficiency"],
     hue: 175,
+    status: "planned",
+  },
+  {
+    slug: "ai-violent-incident-detection",
+    title:
+      "AI-based Violent Incident Detection in Surveillance Videos to Enhance Public Safety",
+    shortTitle: "AI Violent Incident Detection",
+    authors: ["Khaled Merit", "Mohammed Beladgham"],
+    venue: "Journal of Telecommunications and Information Technology",
+    year: 2025,
+    doi: "10.26636/jtit.2025.4.2328",
+    pageCount: 13,
+    pdf: "/papers/ai-violent-incident-detection.pdf",
+    summary:
+      "A comparison study: several modern recognition backbones are applied to the same three benchmark sets to see which combination is realistic for an alerting system in the field.",
+    architecture: "3D CNN",
+    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
+    tags: ["benchmark", "early alerting", "public safety"],
+    hue: 12,
+    status: "planned",
+  },
+  {
+    slug: "cbam-ubi-fights",
+    title:
+      "Violence Detection Enhancement by Involving Convolutional Block Attention Modules Into Various Deep Learning Architectures: Comprehensive Case Study for UBI-Fights Dataset",
+    shortTitle: "CBAM on UBI-Fights",
+    authors: ["Mahmoud Abdelkader Bashery Abbass", "Hyun-Soo Kang"],
+    venue: "IEEE Access",
+    year: 2023,
+    doi: "10.1109/ACCESS.2023.3267409",
+    pageCount: 12,
+    pdf: "/papers/cbam-ubi-fights.pdf",
+    summary:
+      "Drops the same attention block (CBAM) into a range of backbones and measures what it buys in each, isolating the contribution of attention rather than of the architecture around it.",
+    architecture: "2D CNN + Attention",
+    datasets: ["UBI-Fights"],
+    tags: ["CBAM", "attention", "ablation study"],
+    hue: 45,
+    status: "planned",
+  },
+  {
+    slug: "accurate-violence-detection",
+    title:
+      "An accurate violence detection framework using unsupervised spatial–temporal action translation network",
+    shortTitle: "Action Translation Network",
+    authors: [
+      "Tahereh Zarrat Ehsan",
+      "Manoochehr Nahvi",
+      "Seyed Mehdi Mohtavipour",
+    ],
+    venue: "The Visual Computer",
+    year: 2024,
+    doi: "10.1007/s00371-023-02865-3",
+    pageCount: 21,
+    pdf: "/papers/accurate-violence-detection.pdf",
+    summary:
+      "Sidesteps the small-dataset problem by learning without labels: a translation network maps an action's appearance to its motion, and violence shows up as the cases the model cannot reproduce.",
+    architecture: "Unsupervised / Generative",
+    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
+    tags: ["unsupervised", "action translation", "limited data"],
+    hue: 280,
+    status: "planned",
+  },
+  {
+    slug: "spatio-temporal-model",
+    title:
+      "A spatio-temporal model for violence detection based on spatial and temporal attention modules and 2D CNNs",
+    shortTitle: "Spatial + Temporal Attention",
+    authors: ["Javad Mahmoodi", "Hossein Nezamabadi-pour"],
+    venue: "Pattern Analysis and Applications",
+    year: 2024,
+    doi: "10.1007/s10044-024-01265-0",
+    pageCount: 18,
+    pdf: "/papers/spatio-temporal-model.pdf",
+    summary:
+      "Keeps the cheap 2D CNN backbone and adds two attention modules — one choosing where to look in the frame, one choosing when in the clip — to recover 3D-level accuracy.",
+    architecture: "2D CNN + Attention",
+    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
+    tags: ["spatial attention", "temporal attention", "2D CNN"],
+    hue: 25,
     status: "planned",
   },
 ];

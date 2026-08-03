@@ -38,8 +38,10 @@ export function PaperCard({ paper }: { paper: Paper }) {
         </span>
       </div>
 
-      <h3 className="text-ink group-hover:text-signal mt-3 text-base leading-snug font-semibold text-balance transition-colors">
-        {paper.shortTitle}
+      {/* Full paper title, not the short label -- titles run long, so the type
+          is a notch smaller than the rest of the card headings. */}
+      <h3 className="text-ink group-hover:text-signal mt-3 text-[15px] leading-snug font-semibold text-balance transition-colors">
+        {paper.title}
       </h3>
 
       <p className="text-ink-muted mt-2 line-clamp-3 text-sm leading-relaxed">
