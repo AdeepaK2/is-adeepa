@@ -1,6 +1,7 @@
 import type { StudyModule } from "@/types/study";
 import { module3dCnn } from "./3d-cnn";
 import { moduleAirtlab } from "./airtlab-deep-learning";
+import { moduleMultiFrameFusion } from "./multi-frame-feature-fusion";
 
 /**
  * Registry of authored study modules, keyed by paper slug.
@@ -16,6 +17,7 @@ import { moduleAirtlab } from "./airtlab-deep-learning";
 export const studyModules: Record<string, StudyModule> = {
   "3d-cnn": module3dCnn,
   "airtlab-deep-learning": moduleAirtlab,
+  "multi-frame-feature-fusion": moduleMultiFrameFusion,
 };
 
 export function getStudyModule(slug: string): StudyModule | undefined {

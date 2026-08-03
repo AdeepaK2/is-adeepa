@@ -51,6 +51,26 @@ export interface TwoStreamFlowProps {
   fusion?: FusionRow[];
   cases?: StreamCase[];
   labels?: { rgb: string; flow: string };
+  /**
+   * Overrides the visible copy of `streams` mode.
+   *
+   * The defaults describe RGB against optical flow, which is what the two-stream
+   * papers do. Other papers run two lanes over something else entirely -- a pair
+   * of adjacent frames, two resolutions -- and for those the default sentences
+   * would be plainly wrong on screen, so they can be replaced wholesale.
+   */
+  copy?: {
+    /** Chip labels. Default "RGB" and "flow". */
+    chips?: { rgb: string; flow: string; both: string };
+    /** The sentence under the chips, per selection. */
+    lines?: { rgb: string; flow: string; both: string };
+    /** Named in each lane's hover label. Default "3D ResNet-18". */
+    backbone?: string;
+    /** Readout heading. Default "Validation accuracy". */
+    readout?: string;
+    /** What the `both` delta is measured against. Default "vs best single". */
+    deltaLabel?: string;
+  };
 }
 
 /**
@@ -68,8 +88,16 @@ export function TwoStreamFlow({
   fusion = [],
   cases = [],
   labels = { rgb: "RGB frames", flow: "optical flow" },
+  copy,
 }: TwoStreamFlowProps) {
   const accent = hueColor(hue);
+
+  const chips = copy?.chips ?? { rgb: "RGB", flow: "flow", both: "both" };
+  const lines = copy?.lines ?? {
+    rgb: "Three channels of colour. Sees who and where, but has to infer movement.",
+    flow: "Two channels of per-pixel motion. Sees movement directly, and nothing about appearance.",
+    both: "Each stream predicts on its own; the two outputs are added before the softmax.",
+  };
 
   const [selection, setSelection] = useState<Selection>("both");
   const [caseId, setCaseId] = useState(() => cases[0]?.id ?? "");
@@ -106,6 +134,7 @@ export function TwoStreamFlow({
             output={output}
             hue={hue}
             labels={labels}
+            backbone={copy?.backbone ?? "3D ResNet-18"}
             hover={hover}
           />
         </SceneCanvas>
@@ -165,22 +194,18 @@ export function TwoStreamFlow({
             onChange={setSelection}
             accent={accent}
             options={[
-              { value: "rgb", label: "RGB", title: `${labels.rgb} only -- what it looks like` },
-              { value: "flow", label: "flow", title: `${labels.flow} only -- how it moves` },
-              { value: "both", label: "both", title: "Outputs summed, then softmax" },
+              { value: "rgb", label: chips.rgb, title: `${labels.rgb} only` },
+              { value: "flow", label: chips.flow, title: `${labels.flow} only` },
+              { value: "both", label: chips.both, title: "Both lanes, combined" },
             ]}
           />
 
           <p className="text-ink-faint max-w-xs text-xs leading-relaxed">
-            {selection === "rgb"
-              ? "Three channels of colour. Sees who and where, but has to infer movement."
-              : selection === "flow"
-                ? "Two channels of per-pixel motion. Sees movement directly, and nothing about appearance."
-                : "Each stream predicts on its own; the two outputs are added before the softmax."}
+            {lines[selection]}
           </p>
 
           <Readout
-            label="Validation accuracy"
+            label={copy?.readout ?? "Validation accuracy"}
             value={accuracy[selection === "both" ? "both" : selection]}
             accent={accent}
             delta={
@@ -190,7 +215,7 @@ export function TwoStreamFlow({
                 ? accuracy.both - Math.max(accuracy.rgb, accuracy.flow ?? 0)
                 : undefined
             }
-            deltaLabel="vs best single"
+            deltaLabel={copy?.deltaLabel ?? "vs best single"}
           />
         </ControlRow>
       )}
@@ -233,12 +258,14 @@ function Streams({
   output,
   hue,
   labels,
+  backbone,
   hover,
 }: {
   lanes: { rgb: LaneState; flow: LaneState };
   output: LaneState;
   hue: number;
   labels: { rgb: string; flow: string };
+  backbone: string;
   hover: SceneHover;
 }) {
   const reduced = useReducedMotion();
@@ -322,7 +349,7 @@ function Streams({
                 onPointerMove={(event) => {
                   event.stopPropagation();
                   hover.show(
-                    `${name} · 3D ResNet-18 stage ${index + 1} · ${stateWord(state)}`,
+                    `${name} · ${backbone} stage ${index + 1} · ${stateWord(state)}`,
                     event,
                   );
                 }}

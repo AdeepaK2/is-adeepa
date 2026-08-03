@@ -202,11 +202,13 @@ export const papers: Paper[] = [
     pdf: "/papers/multi-frame-feature-fusion.pdf",
     summary:
       "Takes equally spaced frames rather than consecutive ones, extracts features at several depths, and fuses them so both fine detail and broad motion survive into the classifier.",
-    architecture: "2D CNN + Attention",
-    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
+    // No attention anywhere in the paper -- it is a frozen VGG-16 feeding an
+    // LSTM. BEHAVE is its fourth evaluation dataset and was missing here.
+    architecture: "CNN-LSTM",
+    datasets: ["Hockey Fight", "Movies", "Crowd Violence", "BEHAVE"],
     tags: ["feature fusion", "multi-level features", "frame sampling"],
     hue: 95,
-    status: "planned",
+    status: "ready",
   },
   {
     slug: "spatio-temporal-model",

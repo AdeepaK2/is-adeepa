@@ -25,11 +25,19 @@ export interface LineupBlock {
   note?: string;
 }
 
-/** What a paper reports for one model on one dataset. Omit what it does not. */
+/**
+ * What a paper reports for one model on one dataset. Omit what it does not.
+ *
+ * Papers split into two camps here: those that break accuracy into sensitivity
+ * and specificity, and those that publish a single accuracy figure. Outcome mode
+ * draws whichever it is given rather than requiring the richer form, because
+ * accuracy-only reporting is itself one of the findings this review tracks.
+ */
 export interface ModelMetrics {
   sensitivity?: number;
   specificity?: number;
   accuracy?: number;
+  /** Standard deviation across folds, drawn as a whisker on an accuracy bar. */
   accuracySd?: number;
   specificitySd?: number;
 }
@@ -65,6 +73,21 @@ export interface ModelLineupProps {
   datasets?: LineupDataset[];
   /** Model the outcome readout measures its delta against. */
   baselineId?: string;
+  /** What the outcome readout calls its number. */
+  metricLabel?: string;
+  /**
+   * What the outcome chip row is choosing between. Usually datasets, but the
+   * same axis serves anything a paper reports the whole lineup across -- a
+   * prediction granularity, an input length.
+   */
+  datasetLabel?: string;
+}
+
+/** Whether a paper broke this result into the two rates, or reported one figure. */
+function hasRates(metrics?: ModelMetrics): boolean {
+  return (
+    metrics?.sensitivity !== undefined || metrics?.specificity !== undefined
+  );
 }
 
 /**
@@ -80,6 +103,10 @@ export interface ModelLineupProps {
  *
  * Bars run from a true zero, because the interesting failures here are models
  * that score 0% specificity and a truncated axis would flatter them.
+ *
+ * A paper that publishes accuracy alone gets one bar per lane instead of two,
+ * with a whisker for the fold-to-fold spread. That asymmetry is deliberate: put
+ * the two kinds of paper side by side and the missing second bar is visible.
  */
 export function ModelLineup({
   hue = 170,
@@ -87,6 +114,8 @@ export function ModelLineup({
   models = [],
   datasets = [],
   baselineId,
+  metricLabel = "Mean accuracy",
+  datasetLabel = "Dataset",
 }: ModelLineupProps) {
   const accent = hueColor(hue);
   const { frame, hover, hovered } = useSceneHover();
@@ -157,7 +186,7 @@ export function ModelLineup({
       <ControlRow>
         {mode === "outcome" && datasets.length > 1 && (
           <SegmentedControl<string>
-            label="Dataset"
+            label={datasetLabel}
             value={dataset?.id ?? ""}
             onChange={setDatasetId}
             accent={accent}
@@ -213,27 +242,39 @@ export function ModelLineup({
           </>
         ) : (
           <>
-            <ControlGroup label="Sensitivity / specificity">
-              <p className="text-ink-muted font-mono text-[11px] tabular-nums">
-                {metrics?.sensitivity === undefined
-                  ? "not reported"
-                  : `${metrics.sensitivity.toFixed(2)}%`}
-                <span className="text-ink-faint"> / </span>
-                {metrics?.specificity === undefined
-                  ? "not reported"
-                  : `${metrics.specificity.toFixed(2)}%`}
-                {metrics?.sensitivity !== undefined &&
-                  metrics?.specificity !== undefined && (
-                    <span className="text-alert">
-                      {"  gap "}
-                      {(metrics.sensitivity - metrics.specificity).toFixed(2)}
-                    </span>
-                  )}
-              </p>
-            </ControlGroup>
+            {hasRates(metrics) ? (
+              <ControlGroup label="Sensitivity / specificity">
+                <p className="text-ink-muted font-mono text-[11px] tabular-nums">
+                  {metrics?.sensitivity === undefined
+                    ? "not reported"
+                    : `${metrics.sensitivity.toFixed(2)}%`}
+                  <span className="text-ink-faint"> / </span>
+                  {metrics?.specificity === undefined
+                    ? "not reported"
+                    : `${metrics.specificity.toFixed(2)}%`}
+                  {metrics?.sensitivity !== undefined &&
+                    metrics?.specificity !== undefined && (
+                      <span className="text-alert">
+                        {"  gap "}
+                        {(metrics.sensitivity - metrics.specificity).toFixed(2)}
+                      </span>
+                    )}
+                </p>
+              </ControlGroup>
+            ) : (
+              // Papers that publish one accuracy figure get one line. Saying the
+              // two rates were never reported is the more useful thing to show.
+              <ControlGroup label="False-positive behaviour">
+                <p className="text-ink-faint font-mono text-[11px]">
+                  {metrics?.accuracySd === undefined
+                    ? "sensitivity and specificity not reported"
+                    : `± ${metrics.accuracySd.toFixed(2)} across folds · rates not reported`}
+                </p>
+              </ControlGroup>
+            )}
 
             <Readout
-              label="Mean accuracy"
+              label={metricLabel}
               value={metrics?.accuracy}
               accent={accent}
               delta={
@@ -473,9 +514,11 @@ function OutcomeLanes({
     const metrics = dataset ? model.metrics?.[dataset.id] : undefined;
     return {
       model,
+      rates: hasRates(metrics),
       sensitivity: metrics?.sensitivity,
       specificity: metrics?.specificity,
       accuracy: metrics?.accuracy,
+      accuracySd: metrics?.accuracySd,
     };
   });
 
@@ -500,50 +543,87 @@ function OutcomeLanes({
               color={dim ? trackColor : sensColor}
             />
 
-            <Track y={ROW_OFFSET} left={left} color={trackColor} />
-            <Track y={-ROW_OFFSET} left={left} color={trackColor} />
+            {row.rates ? (
+              <>
+                <Track y={ROW_OFFSET} left={left} color={trackColor} />
+                <Track y={-ROW_OFFSET} left={left} color={trackColor} />
 
-            <Bar
-              value={row.sensitivity}
-              y={ROW_OFFSET}
-              left={left}
-              color={sensColor}
-              dim={dim}
-              reduced={reduced}
-              hover={hover}
-              label={`${row.model.label} · sensitivity ${format(
-                row.sensitivity,
-              )} · violent chunks caught`}
-            />
-            <Bar
-              value={row.specificity}
-              y={-ROW_OFFSET}
-              left={left}
-              color={specColor}
-              dim={dim}
-              reduced={reduced}
-              hover={hover}
-              label={`${row.model.label} · specificity ${format(
-                row.specificity,
-              )} · non-violent chunks left alone`}
-            />
-
-            {row.sensitivity !== undefined &&
-              row.specificity !== undefined &&
-              row.sensitivity > row.specificity && (
-                <Gap
-                  from={row.specificity}
-                  to={row.sensitivity}
-                  y={-ROW_OFFSET}
+                <Bar
+                  value={row.sensitivity}
+                  y={ROW_OFFSET}
                   left={left}
+                  color={sensColor}
                   dim={dim}
                   reduced={reduced}
                   hover={hover}
-                  label={`${row.model.label} · ${(
-                    row.sensitivity - row.specificity
-                  ).toFixed(2)} points of the recall on violent clips it does not match on non-violent`}
+                  label={`${row.model.label} · sensitivity ${format(
+                    row.sensitivity,
+                  )} · violent chunks caught`}
                 />
-              )}
+                <Bar
+                  value={row.specificity}
+                  y={-ROW_OFFSET}
+                  left={left}
+                  color={specColor}
+                  dim={dim}
+                  reduced={reduced}
+                  hover={hover}
+                  label={`${row.model.label} · specificity ${format(
+                    row.specificity,
+                  )} · non-violent chunks left alone`}
+                />
+
+                {row.sensitivity !== undefined &&
+                  row.specificity !== undefined &&
+                  row.sensitivity > row.specificity && (
+                    <Gap
+                      from={row.specificity}
+                      to={row.sensitivity}
+                      y={-ROW_OFFSET}
+                      left={left}
+                      dim={dim}
+                      reduced={reduced}
+                      hover={hover}
+                      label={`${row.model.label} · ${(
+                        row.sensitivity - row.specificity
+                      ).toFixed(2)} points of the recall on violent clips it does not match on non-violent`}
+                    />
+                  )}
+              </>
+            ) : (
+              <>
+                <Track y={0} left={left} color={trackColor} />
+                <Bar
+                  value={row.accuracy}
+                  y={0}
+                  left={left}
+                  color={sensColor}
+                  dim={dim}
+                  reduced={reduced}
+                  hover={hover}
+                  label={`${row.model.label} · accuracy ${format(
+                    row.accuracy,
+                  )}${
+                    row.accuracySd === undefined
+                      ? ""
+                      : ` ± ${row.accuracySd.toFixed(2)} across folds`
+                  } · sensitivity and specificity not reported`}
+                />
+                {row.accuracy !== undefined && row.accuracySd !== undefined && (
+                  <Whisker
+                    centre={row.accuracy}
+                    spread={row.accuracySd}
+                    left={left}
+                    dim={dim}
+                    reduced={reduced}
+                    hover={hover}
+                    label={`${row.model.label} · ± ${row.accuracySd.toFixed(
+                      2,
+                    )} points across folds -- the spread the headline figure hides`}
+                  />
+                )}
+              </>
+            )}
           </group>
         );
       })}
@@ -701,6 +781,75 @@ function Gap({
         opacity={dim ? 0.4 : 0.95}
       />
     </mesh>
+  );
+}
+
+/**
+ * The standard deviation across folds, straddling the bar's tip.
+ *
+ * Drawn because the interesting comparisons in accuracy-only papers are usually
+ * decided by margins smaller than this. A bar tip is a claim; the whisker is how
+ * much of that claim survives changing which fold you tested on.
+ */
+function Whisker({
+  centre,
+  spread,
+  left,
+  dim,
+  reduced,
+  hover,
+  label,
+}: {
+  centre: number;
+  spread: number;
+  left: number;
+  dim: boolean;
+  reduced: boolean;
+  hover: SceneHover;
+  label: string;
+}) {
+  const group = useRef<THREE.Group>(null);
+  const targetX = left + (centre / 100) * BAR_SPAN;
+  const width = Math.max(((2 * spread) / 100) * BAR_SPAN, 0.02);
+
+  useFrame(() => {
+    if (!group.current) return;
+    group.current.position.x = reduced
+      ? targetX
+      : THREE.MathUtils.lerp(group.current.position.x, targetX, 0.12);
+  });
+
+  return (
+    <group
+      ref={group}
+      position={[left, 0, BAR_D / 2 + 0.06]}
+      onPointerMove={(event) => {
+        event.stopPropagation();
+        hover.show(label, event);
+      }}
+      onPointerOut={hover.hide}
+    >
+      <mesh>
+        <boxGeometry args={[width, 0.035, 0.06]} />
+        <meshStandardMaterial
+          color="#5b6270"
+          roughness={0.7}
+          transparent
+          opacity={dim ? 0.4 : 0.9}
+        />
+      </mesh>
+      {[-width / 2, width / 2].map((x) => (
+        <mesh key={x} position={[x, 0, 0]}>
+          <boxGeometry args={[0.035, BAR_H * 0.62, 0.06]} />
+          <meshStandardMaterial
+            color="#5b6270"
+            roughness={0.7}
+            transparent
+            opacity={dim ? 0.4 : 0.9}
+          />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
