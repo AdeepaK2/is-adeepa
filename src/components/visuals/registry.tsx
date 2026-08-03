@@ -28,6 +28,11 @@ const ResnetStack = dynamic(
   { ssr: false, loading: () => <VisualSkeleton /> },
 );
 
+const ModelLineup = dynamic(
+  () => import("./model-lineup").then((m) => m.ModelLineup),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
 /**
  * Visuals are addressed by id and configured with a free-form options bag, so
  * the registry has to erase their individual prop types. Each visual validates
@@ -46,6 +51,7 @@ export const visualRegistry: Partial<Record<VisualId, VisualComponent>> = {
   "two-stream-flow": TwoStreamFlow as VisualComponent,
   "sequence-timeline": SequenceTimeline as VisualComponent,
   "resnet-stack": ResnetStack as VisualComponent,
+  "model-lineup": ModelLineup as VisualComponent,
 };
 
 export function VisualSkeleton() {

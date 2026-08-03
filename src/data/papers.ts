@@ -94,10 +94,12 @@ export const papers: Paper[] = [
     summary:
       "Introduces the AIRTLab dataset, built specifically to expose false positives, and measures how well established detectors hold up when non-violent action looks superficially violent.",
     architecture: "3D CNN",
-    datasets: ["AIRTLab", "RWF-2000", "Hockey Fight", "Movies", "Crowd Violence"],
+    // RWF-2000 and Movies are discussed in Related Works only; no experiment is
+    // run on either. This lists the three datasets results are reported on.
+    datasets: ["AIRTLab", "Hockey Fight", "Crowd Violence"],
     tags: ["dataset", "false positives", "evaluation"],
     hue: 160,
-    status: "planned",
+    status: "ready",
   },
   {
     slug: "cbam-ubi-fights",

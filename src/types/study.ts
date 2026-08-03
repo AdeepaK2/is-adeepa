@@ -12,7 +12,8 @@ export type VisualId =
   | "two-stream-flow"
   | "attention-map"
   | "sequence-timeline"
-  | "resnet-stack";
+  | "resnet-stack"
+  | "model-lineup";
 
 export interface Visual {
   kind: VisualId;

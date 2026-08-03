@@ -17,7 +17,8 @@
       "Bash(curl -s -o /dev/null -w \"pdf:%{http_code}\\\\n\" http://localhost:3000/papers/kiannet-cnn-lstm.pdf)",
       "Bash(curl -s -o /dev/null -w \"pdfasset:%{http_code}\\\\n\" \"http://localhost:3000/papers/3d-cnn.pdf\")",
       "Bash(/private/tmp/claude-501/-Users-adeepak-Developer-Learn/281dd144-3171-43c5-93f2-905eb846f5b4/scratchpad/v/bin/python3 -c ' *)",
-      "Bash(grep -rn 'hsl\\(\\\\${hue} 78% 62%\\)' src/components/visuals/)"
+      "Bash(grep -rn 'hsl\\(\\\\${hue} 78% 62%\\)' src/components/visuals/)",
+      "Bash(pkill -f \"next dev\")"
     ]
   }
 }
