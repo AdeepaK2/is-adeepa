@@ -168,6 +168,9 @@ export const moduleMultiFrameFusion: StudyModule = {
         kind: "two-stream-flow",
         options: {
           mode: "streams",
+          // Eqs. 1-2 define '+' as concatenation, so the join keeps both feature
+          // maps and doubles the channel count rather than pooling them.
+          join: "concat",
           hue: 95,
           labels: { rgb: "frame at time t", flow: "frame at time t+1" },
           copy: {

@@ -257,10 +257,20 @@ export const papers: Paper[] = [
     summary:
       "Sidesteps the small-dataset problem by learning without labels: a translation network maps an action's appearance to its motion, and violence shows up as the cases the model cannot reproduce.",
     architecture: "Unsupervised / Generative",
-    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
+    // Crowd Violence is not run anywhere in the paper and was wrong here.
+    // Results are reported on Hockey, Movies and AIRTLab (T4), plus both UCSD
+    // partitions as an out-of-domain anomaly test (T7) -- see the review
+    // extraction, which records the role of each dataset.
+    datasets: [
+      "Hockey Fight",
+      "Movies",
+      "AIRTLab",
+      "UCSD Ped1",
+      "UCSD Ped2",
+    ],
     tags: ["unsupervised", "action translation", "limited data"],
     hue: 280,
-    status: "planned",
+    status: "ready",
   },
   {
     slug: "spatio-temporal-model",

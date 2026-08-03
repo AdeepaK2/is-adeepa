@@ -20,6 +20,18 @@ type LaneState = "on" | "off" | "ok" | "fail";
 
 type Selection = "rgb" | "flow" | "both";
 
+/**
+ * What the two lanes actually do where they meet.
+ *
+ * This is the distinction the review's `motionEncoding` axis turns on, and it is
+ * invisible if every paper's lanes merge into the same node: adding two score
+ * vectors, stacking two feature maps, and subtracting one frame from the next
+ * are three different operations with three different outputs. `sum` keeps
+ * everything and averages the evidence, `concat` keeps everything and doubles
+ * the width, `subtract` destroys most of it and keeps only what changed.
+ */
+export type JoinKind = "sum" | "concat" | "subtract";
+
 /** One qualitative example, with which streams got it right. */
 export interface StreamCase {
   id: string;
@@ -45,6 +57,12 @@ export interface TwoStreamFlowProps {
    * their outputs beats either, using the paper's qualitative cases.
    */
   mode?: "streams" | "fusion";
+  /**
+   * The operation where the lanes meet. Defaults to `sum`, the late fusion the
+   * two-stream papers do. Set it to what the paper actually performs -- the
+   * merge node and the output are drawn differently for each.
+   */
+  join?: JoinKind;
   /** Accuracy of each stream alone, and of the two fused. */
   accuracy?: { rgb?: number; flow?: number; both?: number };
   /** Fusion variants -- which model the second stream contributed. */
@@ -70,8 +88,28 @@ export interface TwoStreamFlowProps {
     readout?: string;
     /** What the `both` delta is measured against. Default "vs best single". */
     deltaLabel?: string;
+    /** Hover label on the merge node. Defaults to a description of `join`. */
+    join?: string;
+    /** Hover label on the output block. Defaults to a description of `join`. */
+    output?: string;
   };
 }
+
+/** Default hover copy per merge operation, when a module does not override it. */
+const JOIN_COPY: Record<JoinKind, { join: string; output: string }> = {
+  sum: {
+    join: "late fusion · the two streams' scores are added",
+    output: "softmax · one prediction from the summed scores",
+  },
+  concat: {
+    join: "concatenation · the two feature maps are stacked along the channel axis",
+    output: "twice the channels · nothing is discarded, the width doubles",
+  },
+  subtract: {
+    join: "subtraction · one input is taken away from the other",
+    output: "the difference · whatever did not move has cancelled to near zero",
+  },
+};
 
 /**
  * The two-stream architecture: appearance frames along one lane, optical flow
@@ -84,6 +122,7 @@ export interface TwoStreamFlowProps {
 export function TwoStreamFlow({
   hue = 210,
   mode = "streams",
+  join = "sum",
   accuracy = {},
   fusion = [],
   cases = [],
@@ -133,8 +172,11 @@ export function TwoStreamFlow({
             lanes={lanes}
             output={output}
             hue={hue}
+            join={join}
             labels={labels}
             backbone={copy?.backbone ?? "3D ResNet-18"}
+            joinLabel={copy?.join ?? JOIN_COPY[join].join}
+            outputLabel={copy?.output ?? JOIN_COPY[join].output}
             hover={hover}
           />
         </SceneCanvas>
@@ -257,15 +299,21 @@ function Streams({
   lanes,
   output,
   hue,
+  join,
   labels,
   backbone,
+  joinLabel,
+  outputLabel,
   hover,
 }: {
   lanes: { rgb: LaneState; flow: LaneState };
   output: LaneState;
   hue: number;
+  join: JoinKind;
   labels: { rgb: string; flow: string };
   backbone: string;
+  joinLabel: string;
+  outputLabel: string;
   hover: SceneHover;
 }) {
   const reduced = useReducedMotion();
@@ -395,15 +443,23 @@ function Streams({
         );
       })}
 
+      {/*
+        The merge node, drawn as the operation it performs. A sphere pools two
+        things into one, a stacked pair keeps both side by side, and a ring is
+        the hole subtraction leaves.
+      */}
       <mesh
         position={[SUM_X, 0, 0]}
+        rotation={join === "subtract" ? [0, Math.PI / 2, 0] : [0, 0, 0]}
         onPointerMove={(event) => {
           event.stopPropagation();
-          hover.show("late fusion · the two streams' scores are added", event);
+          hover.show(joinLabel, event);
         }}
         onPointerOut={hover.hide}
       >
-        <sphereGeometry args={[0.3, 24, 24]} />
+        {join === "sum" && <sphereGeometry args={[0.3, 24, 24]} />}
+        {join === "concat" && <boxGeometry args={[0.26, 0.62, 0.62]} />}
+        {join === "subtract" && <torusGeometry args={[0.24, 0.09, 14, 28]} />}
         <meshStandardMaterial
           color={output === "fail" ? palette.fail : palette.lit}
           roughness={0.3}
@@ -415,30 +471,125 @@ function Streams({
         <meshBasicMaterial color={palette.lit} />
       </mesh>
 
-      <mesh
-        position={[OUT_X, 0, 0]}
-        onPointerMove={(event) => {
-          event.stopPropagation();
-          hover.show(
-            `softmax · fight or non-fight · ${
-              output === "fail" ? "wrong on this clip" : "correct on this clip"
-            }`,
-            event,
-          );
-        }}
-        onPointerOut={hover.hide}
-      >
-        <boxGeometry args={[0.45, 0.9, 0.9]} />
-        <meshStandardMaterial
-          color={output === "fail" ? palette.fail : palette.lit}
-          roughness={0.35}
-          metalness={0.15}
-          transparent
-          opacity={0.9}
-        />
-      </mesh>
+      <JoinOutput
+        join={join}
+        x={OUT_X}
+        color={output === "fail" ? palette.fail : palette.lit}
+        pale={palette.off}
+        label={outputLabel}
+        hover={hover}
+      />
     </group>
   );
+}
+
+/**
+ * What comes out of the merge, sized and shaped by the operation.
+ *
+ * `sum` collapses to a single score block. `concat` is drawn as two blocks
+ * stacked along the depth axis, because concatenation discards nothing and the
+ * channel count doubles. `subtract` is drawn as a sparse scatter inside a pale
+ * ghost of the original volume -- the ghost is what was there before, the few
+ * lit cells are what survived the cancellation.
+ */
+function JoinOutput({
+  join,
+  x,
+  color,
+  pale,
+  label,
+  hover,
+}: {
+  join: JoinKind;
+  x: number;
+  color: THREE.Color;
+  pale: THREE.Color;
+  label: string;
+  hover: SceneHover;
+}) {
+  const residue = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, i) => ({
+        y: (noise(i * 3) - 0.5) * 0.78,
+        z: (noise(i * 3 + 1) - 0.5) * 0.78,
+        size: 0.07 + noise(i * 3 + 2) * 0.07,
+      })),
+    [],
+  );
+
+  const handlers = {
+    onPointerMove: (event: { stopPropagation: () => void; clientX: number; clientY: number }) => {
+      event.stopPropagation();
+      hover.show(label, event);
+    },
+    onPointerOut: hover.hide,
+  };
+
+  if (join === "subtract") {
+    return (
+      <group position={[x, 0, 0]} {...handlers}>
+        {/* The volume the difference was taken from, left as a pale shell. */}
+        <mesh>
+          <boxGeometry args={[0.45, 0.9, 0.9]} />
+          <meshStandardMaterial
+            color={pale}
+            roughness={0.6}
+            transparent
+            opacity={0.28}
+          />
+        </mesh>
+        {residue.map((cell, index) => (
+          <mesh key={index} position={[0, cell.y, cell.z]}>
+            <boxGeometry args={[0.5, cell.size, cell.size]} />
+            <meshStandardMaterial color={color} roughness={0.35} metalness={0.15} />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+
+  if (join === "concat") {
+    return (
+      <group position={[x, 0, 0]} {...handlers}>
+        {[-0.24, 0.24].map((z) => (
+          <mesh key={z} position={[0, 0, z]}>
+            <boxGeometry args={[0.45, 0.9, 0.42]} />
+            <meshStandardMaterial
+              color={color}
+              roughness={0.35}
+              metalness={0.15}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+
+  return (
+    <mesh position={[x, 0, 0]} {...handlers}>
+      <boxGeometry args={[0.45, 0.9, 0.9]} />
+      <meshStandardMaterial
+        color={color}
+        roughness={0.35}
+        metalness={0.15}
+        transparent
+        opacity={0.9}
+      />
+    </mesh>
+  );
+}
+
+/**
+ * Deterministic pseudo-noise in [0, 1) from an index.
+ *
+ * Pure rather than a seeded closure, so the scatter is identical on every render
+ * without anything being reassigned after one completes.
+ */
+function noise(n: number): number {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
 }
 
 /** The input clip: a short run of frames feeding one lane. */

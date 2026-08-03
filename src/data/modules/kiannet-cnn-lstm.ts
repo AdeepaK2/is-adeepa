@@ -197,6 +197,9 @@ export const moduleKianNet: StudyModule = {
         kind: "two-stream-flow",
         options: {
           mode: "streams",
+          // The frames are subtracted, not combined: everything static cancels
+          // and only the moving region survives into the backbone.
+          join: "subtract",
           hue: 320,
           labels: { rgb: "frame at time t", flow: "frame at time t+1" },
           copy: {

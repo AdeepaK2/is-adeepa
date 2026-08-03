@@ -13,7 +13,8 @@ export type VisualId =
   | "attention-map"
   | "sequence-timeline"
   | "resnet-stack"
-  | "model-lineup";
+  | "model-lineup"
+  | "reconstruction-gap";
 
 export interface Visual {
   kind: VisualId;

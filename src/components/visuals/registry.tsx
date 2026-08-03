@@ -33,6 +33,11 @@ const ModelLineup = dynamic(
   { ssr: false, loading: () => <VisualSkeleton /> },
 );
 
+const ReconstructionGap = dynamic(
+  () => import("./reconstruction-gap").then((m) => m.ReconstructionGap),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
 /**
  * Visuals are addressed by id and configured with a free-form options bag, so
  * the registry has to erase their individual prop types. Each visual validates
@@ -52,6 +57,7 @@ export const visualRegistry: Partial<Record<VisualId, VisualComponent>> = {
   "sequence-timeline": SequenceTimeline as VisualComponent,
   "resnet-stack": ResnetStack as VisualComponent,
   "model-lineup": ModelLineup as VisualComponent,
+  "reconstruction-gap": ReconstructionGap as VisualComponent,
 };
 
 export function VisualSkeleton() {

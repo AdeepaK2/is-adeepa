@@ -1,5 +1,6 @@
 import type { StudyModule } from "@/types/study";
 import { module3dCnn } from "./3d-cnn";
+import { moduleAccurateViolence } from "./accurate-violence-detection";
 import { moduleAirtlab } from "./airtlab-deep-learning";
 import { moduleEfficientRealtime } from "./efficient-realtime-modeling";
 import { moduleKianNet } from "./kiannet-cnn-lstm";
@@ -18,6 +19,7 @@ import { moduleMultiFrameFusion } from "./multi-frame-feature-fusion";
  */
 export const studyModules: Record<string, StudyModule> = {
   "3d-cnn": module3dCnn,
+  "accurate-violence-detection": moduleAccurateViolence,
   "airtlab-deep-learning": moduleAirtlab,
   "efficient-realtime-modeling": moduleEfficientRealtime,
   "kiannet-cnn-lstm": moduleKianNet,
