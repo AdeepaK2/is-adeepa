@@ -45,17 +45,20 @@ export const papers: Paper[] = [
     summary:
       "Targets the cost of watching many cameras at once, replacing expensive 3D convolutions and optical flow with cheaper motion modelling that still runs in real time.",
     architecture: "2D CNN + Attention",
+    // Six evaluation datasets plus UCF-Crime, which carries a reported
+    // cross-dataset AUC (T9) rather than being named only. Movies was missing.
     datasets: [
       "RWF-2000",
       "RLVS",
       "Hockey Fight",
+      "Movies",
       "Crowd Violence",
       "Surveillance Camera Fight",
       "UCF-Crime",
     ],
     tags: ["real-time", "efficiency", "motion modelling"],
     hue: 190,
-    status: "planned",
+    status: "ready",
   },
   {
     slug: "multi-frame-feature-fusion",
