@@ -38,6 +38,16 @@ const ReconstructionGap = dynamic(
   { ssr: false, loading: () => <VisualSkeleton /> },
 );
 
+const BidirectionalSequence = dynamic(
+  () => import("./bidirectional-sequence").then((m) => m.BidirectionalSequence),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
+const ThroughputBudget = dynamic(
+  () => import("./throughput-budget").then((m) => m.ThroughputBudget),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
 /**
  * Visuals are addressed by id and configured with a free-form options bag, so
  * the registry has to erase their individual prop types. Each visual validates
@@ -58,6 +68,8 @@ export const visualRegistry: Partial<Record<VisualId, VisualComponent>> = {
   "resnet-stack": ResnetStack as VisualComponent,
   "model-lineup": ModelLineup as VisualComponent,
   "reconstruction-gap": ReconstructionGap as VisualComponent,
+  "bidirectional-sequence": BidirectionalSequence as VisualComponent,
+  "throughput-budget": ThroughputBudget as VisualComponent,
 };
 
 export function VisualSkeleton() {

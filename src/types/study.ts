@@ -14,7 +14,9 @@ export type VisualId =
   | "sequence-timeline"
   | "resnet-stack"
   | "model-lineup"
-  | "reconstruction-gap";
+  | "reconstruction-gap"
+  | "bidirectional-sequence"
+  | "throughput-budget";
 
 export interface Visual {
   kind: VisualId;

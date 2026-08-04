@@ -213,12 +213,12 @@ export const papers: Paper[] = [
     pageCount: 13,
     pdf: "/papers/ai-violent-incident-detection.pdf",
     summary:
-      "A comparison study: several modern recognition backbones are applied to the same three benchmark sets to see which combination is realistic for an alerting system in the field.",
-    architecture: "3D CNN",
+      "A benchmark grid: seven per-frame feature extractors crossed with three temporal classifiers on the same three sets. Nearly every deep combination reaches 1.000, which says more about the benchmarks than about the models.",
+    architecture: "CNN-LSTM",
     datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
     tags: ["benchmark", "early alerting", "public safety"],
     hue: 12,
-    status: "planned",
+    status: "ready",
   },
   {
     slug: "cbam-ubi-fights",
