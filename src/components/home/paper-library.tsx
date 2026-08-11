@@ -36,6 +36,8 @@ export function PaperLibrary({ papers, families, datasets }: PaperLibraryProps) 
       if (dataset && !paper.datasets.includes(dataset)) return false;
       if (!needle) return true;
       return [
+        // Searchable by reading-list code, so "V007" finds the paper.
+        paper.code,
         paper.title,
         paper.shortTitle,
         paper.summary,

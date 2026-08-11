@@ -24,6 +24,11 @@ export function PaperCard({ paper }: { paper: Paper }) {
       />
 
       <div className="relative flex items-center gap-2">
+        {/* The reading-list number leads, because that is how the list is
+            navigated when a paper is referred to by code rather than by name. */}
+        <span className="text-ink-faint font-mono text-[10px] tracking-wide tabular-nums">
+          {paper.code}
+        </span>
         <span
           className="rounded-full px-2 py-0.5 font-mono text-[10px] tracking-wide"
           style={{

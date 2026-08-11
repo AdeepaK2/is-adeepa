@@ -30,6 +30,9 @@ export function PaperHeader({
         </Link>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
+          <span className="text-ink-faint font-mono text-[11px] tabular-nums">
+            {paper.code}
+          </span>
           <span
             className="rounded-full px-2.5 py-0.5 font-mono text-[11px]"
             style={{
