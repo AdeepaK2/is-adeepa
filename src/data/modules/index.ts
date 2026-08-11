@@ -5,6 +5,7 @@ import { moduleAirtlab } from "./airtlab-deep-learning";
 import { moduleEfficientRealtime } from "./efficient-realtime-modeling";
 import { moduleKianNet } from "./kiannet-cnn-lstm";
 import { moduleMultiFrameFusion } from "./multi-frame-feature-fusion";
+import { moduleVdNet } from "./vd-net-edge-surveillance";
 
 /**
  * Registry of authored study modules, keyed by paper slug.
@@ -24,6 +25,7 @@ export const studyModules: Record<string, StudyModule> = {
   "efficient-realtime-modeling": moduleEfficientRealtime,
   "kiannet-cnn-lstm": moduleKianNet,
   "multi-frame-feature-fusion": moduleMultiFrameFusion,
+  "vd-net-edge-surveillance": moduleVdNet,
 };
 
 export function getStudyModule(slug: string): StudyModule | undefined {

@@ -48,6 +48,16 @@ const ThroughputBudget = dynamic(
   { ssr: false, loading: () => <VisualSkeleton /> },
 );
 
+const TcnReceptiveField = dynamic(
+  () => import("./tcn-receptive-field").then((m) => m.TcnReceptiveField),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
+const AttentionMap = dynamic(
+  () => import("./attention-map").then((m) => m.AttentionMap),
+  { ssr: false, loading: () => <VisualSkeleton /> },
+);
+
 /**
  * Visuals are addressed by id and configured with a free-form options bag, so
  * the registry has to erase their individual prop types. Each visual validates
@@ -70,6 +80,8 @@ export const visualRegistry: Partial<Record<VisualId, VisualComponent>> = {
   "reconstruction-gap": ReconstructionGap as VisualComponent,
   "bidirectional-sequence": BidirectionalSequence as VisualComponent,
   "throughput-budget": ThroughputBudget as VisualComponent,
+  "tcn-receptive-field": TcnReceptiveField as VisualComponent,
+  "attention-map": AttentionMap as VisualComponent,
 };
 
 export function VisualSkeleton() {

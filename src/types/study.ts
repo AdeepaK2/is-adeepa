@@ -16,7 +16,8 @@ export type VisualId =
   | "model-lineup"
   | "reconstruction-gap"
   | "bidirectional-sequence"
-  | "throughput-budget";
+  | "throughput-budget"
+  | "tcn-receptive-field";
 
 export interface Visual {
   kind: VisualId;

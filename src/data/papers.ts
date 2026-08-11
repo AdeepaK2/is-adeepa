@@ -113,12 +113,21 @@ export const papers: Paper[] = [
     // also names its model VD-Net. This one is ST-TCN based; V010 is ConvLSTM
     // plus a GRU.
     summary:
-      "Designs for the camera rather than the datacentre: a compact model that runs on edge hardware, so footage never has to leave the device to be classified.",
+      "Designs for the camera rather than the datacentre: a compact model that runs on edge hardware, so footage never has to leave the device to be classified. It names the Jetson it targets and never reports a measurement from it.",
     architecture: "Edge / Lightweight",
-    datasets: ["Hockey Fight"],
+    // Results are reported on all four in T2, T4 and T5; only Hockey Fight was
+    // listed here before. The paper's own names for the last two are "movie
+    // fight" and "violent flow" -- see the review extraction, which records the
+    // aliases and why the last one is filed as Crowd Violence.
+    datasets: [
+      "Hockey Fight",
+      "Movies",
+      "Surveillance Camera Fight",
+      "Crowd Violence",
+    ],
     tags: ["edge computing", "deployment", "efficiency"],
     hue: 175,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V006",
