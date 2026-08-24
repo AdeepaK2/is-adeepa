@@ -9,6 +9,9 @@ import { moduleEfficientRealtime } from "./efficient-realtime-modeling";
 import { moduleKianNet } from "./kiannet-cnn-lstm";
 import { moduleMultiFrameFusion } from "./multi-frame-feature-fusion";
 import { moduleScanConvLstm } from "./scan-convlstm-fight-detection";
+import { moduleSpikingNeuralNetworks } from "./spiking-neural-networks";
+import { moduleSwin3dart } from "./swin-3dart";
+import { moduleTemporalAwareTransformer } from "./temporal-aware-transformer";
 import { moduleSpatioTemporal } from "./spatio-temporal-model";
 import { moduleVdNet } from "./vd-net-edge-surveillance";
 import { moduleViolence4d } from "./violence-4d";
@@ -36,6 +39,9 @@ export const studyModules: Record<string, StudyModule> = {
   "multi-frame-feature-fusion": moduleMultiFrameFusion,
   "scan-convlstm-fight-detection": moduleScanConvLstm,
   "spatio-temporal-model": moduleSpatioTemporal,
+  "spiking-neural-networks": moduleSpikingNeuralNetworks,
+  "swin-3dart": moduleSwin3dart,
+  "temporal-aware-transformer": moduleTemporalAwareTransformer,
   "vd-net-edge-surveillance": moduleVdNet,
   "violence-4d": moduleViolence4d,
 };

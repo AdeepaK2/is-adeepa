@@ -156,7 +156,7 @@ export const papers: Paper[] = [
     ],
     tags: ["spatial attention", "temporal attention", "2D CNN"],
     hue: 25,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V007",
@@ -176,7 +176,7 @@ export const papers: Paper[] = [
     datasets: ["RWF-2000", "Crowd Violence", "Hockey Fight", "Movies"],
     tags: ["ConvLSTM", "spatial attention", "channel attention"],
     hue: 300,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V008",
@@ -203,7 +203,7 @@ export const papers: Paper[] = [
     datasets: ["UBI-Fights"],
     tags: ["CBAM", "attention", "ablation study"],
     hue: 45,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V009",
@@ -266,7 +266,7 @@ export const papers: Paper[] = [
     ],
     tags: ["edge computing", "IIoT", "early alerting"],
     hue: 250,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V011",
@@ -364,10 +364,20 @@ export const papers: Paper[] = [
     summary:
       "Swaps continuous activations for neurons that fire in discrete spikes, so time is encoded in the network itself rather than bolted on — a natural fit for low-power hardware.",
     architecture: "Spiking Neural Network",
-    datasets: ["RWF-2000", "Hockey Fight", "Movies", "Crowd Violence"],
+    // T3 (p11) reports results on HMDB51 and UCF101 too, so both are evaluation
+    // datasets by the rule this field follows -- they are action recognition
+    // rather than violence, and they are where the architecture collapses.
+    datasets: [
+      "RWF-2000",
+      "Hockey Fight",
+      "Movies",
+      "Crowd Violence",
+      "HMDB51",
+      "UCF101",
+    ],
     tags: ["spiking neurons", "neuromorphic", "temporal coding"],
     hue: 135,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V016",
@@ -406,58 +416,64 @@ export const papers: Paper[] = [
   },
   {
     code: "V017",
-    slug: "bidirectional-motion-attention",
-    title:
-      "Lightweight Violence Detection Model Based on 2D CNN with Bi-Directional Motion Attention",
-    shortTitle: "Bi-Directional Motion Attention",
-    authors: ["Jingwen Wang", "Daqi Zhao", "Haoming Li", "Deqiang Wang"],
-    venue: "Applied Sciences",
-    year: 2024,
-    doi: "10.3390/app14114895",
-    pageCount: 20,
-    pdf: "/papers/V017-bidirectional-motion-attention.pdf",
+    slug: "temporal-aware-transformer",
+    title: "Temporal-Aware Transformer Approach for Violence Activity Recognition",
+    shortTitle: "Temporal-Aware Transformer",
+    authors: [
+      "Rajdeep Chatterjee",
+      "Ritabrata Roy Choudhury",
+      "Mahendra Kumar Gourisaria",
+      "Sreejata Banerjee",
+      "Soumik Dey",
+      "Manoj Sahni",
+      "Ernesto León-Castro",
+    ],
+    venue: "IEEE Access",
+    year: 2025,
+    doi: "10.1109/ACCESS.2025.3560828",
+    pageCount: 12,
+    pdf: "/papers/V017-temporal-aware-transformer.pdf",
     summary:
-      "Keeps a 2D CNN and recovers the missing time axis with a motion attention module that reads change in both temporal directions, aiming at 3D-model accuracy without paying 3D-model cost.",
-    architecture: "2D CNN + Attention",
-    datasets: ["RWF-2000", "Hockey Fight", "Movies", "Crowd Violence"],
-    tags: ["motion attention", "lightweight", "2D CNN"],
+      "Runs MobileNetV2 over sixteen frames, then swaps the usual BiLSTM for a transformer encoder so self-attention rather than recurrence relates one frame to another. Both variants are trained; the accuracy figures for them do not agree between the text and the tables.",
+    // The transformer is temporal only -- multi-head self-attention over sixteen
+    // per-frame MobileNetV2 embeddings, not patch embeddings over an image. No
+    // family in the closed list fits exactly; self-attention is the contribution,
+    // so it is filed here rather than under CNN-LSTM (which is the other variant).
+    architecture: "Vision Transformer",
+    // RLVS, from Soliman et al. (2019) -- cited only as [19] and never named in
+    // the paper. It is the only dataset used; no other benchmark appears.
+    datasets: ["RLVS"],
+    tags: ["self-attention", "MobileNetV2", "transformer"],
     hue: 115,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V018",
-    slug: "dynamic-3d-attention-maps",
+    slug: "swin-3dart",
     title:
-      "A temporal–spatial deep learning framework leveraging dynamic 3D attention maps for violence detection",
-    shortTitle: "Dynamic 3D Attention Maps",
+      "Swin-3DART: An Efficient and Robust Lightweight Transformer for Video Anomaly Detection with TG-RGB+",
+    shortTitle: "Swin-3DART",
     authors: [
-      "Elizabeth B. Varghese",
-      "Almiqdad Elzein",
-      "Yin Yang",
-      "Marwa Qaraqe",
+      "Intissar Ziani",
+      "Gueltoum Bendiab",
+      "Mourad Bouzenada",
+      "Meriem Guerar",
     ],
-    venue: "Neural Computing and Applications",
-    year: 2025,
-    doi: "10.1007/s00521-025-11641-4",
-    pageCount: 21,
-    pdf: "/papers/V018-dynamic-3d-attention-maps.pdf",
+    venue: "IET Image Processing",
+    year: 2026,
+    doi: "10.1049/ipr2.70318",
+    pageCount: 23,
+    pdf: "/papers/V018-swin-3dart.pdf",
     summary:
-      "Rejects whole-clip classification: violence occupies small regions in space and time, so the model predicts where, when and for how long to attend, and reasons over several attended regions at once.",
-    // Family is provisional. The framework is attention-first over spatiotemporal
-    // volumes with a residual 3D backbone, which the closed family list has no
-    // exact slot for -- confirm against the architecture when the review
-    // extraction is written.
-    architecture: "3D CNN",
-    datasets: [
-      "Surveillance Camera Fight",
-      "Hockey Fight",
-      "RLVS",
-      "Crowd Violence",
-      "MSV",
-    ],
-    tags: ["3D attention maps", "region attention", "interpretability"],
+      "Sums a temporal-gradient motion channel into RGB so a pre-trained video Swin transformer gets motion for free, then adds a parameter-free pooling module that cuts FLOPs and memory by roughly 12%. The most thoroughly evaluated paper in the library — and its own latency table refutes its real-time claim.",
+    architecture: "Vision Transformer",
+    // Weakly supervised anomaly detection rather than clip classification, so
+    // every headline figure is a frame-level ROC AUC. UCF-Crime is an
+    // evaluation dataset here, not a mentioned-only one as in V001.
+    datasets: ["UBI-Fights", "UCF-Crime", "RLVS"],
+    tags: ["Swin transformer", "adversarial robustness", "temporal gradient"],
     hue: 230,
-    status: "planned",
+    status: "ready",
   },
 ];
 
