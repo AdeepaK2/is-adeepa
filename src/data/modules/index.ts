@@ -2,8 +2,10 @@ import type { StudyModule } from "@/types/study";
 import { module3dCnn } from "./3d-cnn";
 import { moduleAiViolentIncident } from "./ai-violent-incident-detection";
 import { moduleAirtlab } from "./airtlab-deep-learning";
+import { moduleBiDirectionalMotionAttention } from "./bi-directional-motion-attention";
 import { moduleCbamUbiFights } from "./cbam-ubi-fights";
 import { moduleCnnConvLstmTemporalAttention } from "./cnn-convlstm-temporal-attention";
+import { moduleDynamic3dAttentionMaps } from "./dynamic-3d-attention-maps";
 import { moduleEdgeVisionIiot } from "./edge-vision-iiot";
 import { moduleEfficientRealtime } from "./efficient-realtime-modeling";
 import { moduleKianNet } from "./kiannet-cnn-lstm";
@@ -31,8 +33,10 @@ export const studyModules: Record<string, StudyModule> = {
   "3d-cnn": module3dCnn,
   "ai-violent-incident-detection": moduleAiViolentIncident,
   "airtlab-deep-learning": moduleAirtlab,
+  "bi-directional-motion-attention": moduleBiDirectionalMotionAttention,
   "cbam-ubi-fights": moduleCbamUbiFights,
   "cnn-convlstm-temporal-attention": moduleCnnConvLstmTemporalAttention,
+  "dynamic-3d-attention-maps": moduleDynamic3dAttentionMaps,
   "edge-vision-iiot": moduleEdgeVisionIiot,
   "efficient-realtime-modeling": moduleEfficientRealtime,
   "kiannet-cnn-lstm": moduleKianNet,

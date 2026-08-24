@@ -3,8 +3,8 @@ import type { ArchitectureFamily, Paper } from "@/types/paper";
 /**
  * The paper library, in IN3901 reading-list order.
  *
- * `code` is the reading list's own identifier (V001-V018, with V005 and V014
- * unassigned) and the array is sorted by it, because the home page's default
+ * `code` is the reading list's own identifier, V001-V018 with no gaps, and the
+ * array is sorted by it, because the home page's default
  * "Reading list order" is just this array's order. It is also the PDF's filename
  * prefix in /public/papers, so a file on disk can be matched to an entry here
  * without opening it.
@@ -127,6 +127,34 @@ export const papers: Paper[] = [
     ],
     tags: ["edge computing", "deployment", "efficiency"],
     hue: 175,
+    status: "ready",
+  },
+  {
+    code: "V005",
+    slug: "bi-directional-motion-attention",
+    title:
+      "Lightweight Violence Detection Model Based on 2D CNN with Bi-Directional Motion Attention",
+    shortTitle: "Bi-Directional Motion Attention",
+    authors: ["Jingwen Wang", "Daqi Zhao", "Haoming Li", "Deqiang Wang"],
+    venue: "Applied Sciences",
+    year: 2024,
+    doi: "10.3390/app14114895",
+    pageCount: 20,
+    pdf: "/papers/V005-bi-directional-motion-attention.pdf",
+    summary:
+      "The cheapest model in the library at 1.21 GFLOPs, and the best on RWF-2000 in its own comparison table. It refuses 3D convolution, optical flow and recurrence outright, rebuilding motion from frame-grouping, a temporal shift and a two-way difference gate.",
+    architecture: "2D CNN + Attention",
+    // Results are reported on all four in T6 (p15) and T8 (p17). The paper's own
+    // names are "Movie Fight" and "Surveillance Camera dataset" -- see the
+    // review extraction, which records the aliases.
+    datasets: [
+      "RWF-2000",
+      "Movies",
+      "Hockey Fight",
+      "Surveillance Camera Fight",
+    ],
+    tags: ["lightweight", "motion attention", "temporal shift"],
+    hue: 275,
     status: "ready",
   },
   {
@@ -347,6 +375,41 @@ export const papers: Paper[] = [
     datasets: ["Hockey Fight", "Movies", "Crowd Violence", "BEHAVE"],
     tags: ["feature fusion", "multi-level features", "frame sampling"],
     hue: 95,
+    status: "ready",
+  },
+  {
+    code: "V014",
+    slug: "dynamic-3d-attention-maps",
+    title:
+      "A temporal-spatial deep learning framework leveraging dynamic 3D attention maps for violence detection",
+    shortTitle: "Dynamic 3D Attention Maps",
+    authors: [
+      "Elizabeth B. Varghese",
+      "Almiqdad Elzein",
+      "Yin Yang",
+      "Marwa Qaraqe",
+    ],
+    venue: "Neural Computing and Applications",
+    year: 2025,
+    doi: "10.1007/s00521-025-11641-4",
+    pageCount: 21,
+    pdf: "/papers/V014-dynamic-3d-attention-maps.pdf",
+    summary:
+      "The only paper here whose attention crops rather than weights: small networks regress a cuboid in space and time, the clip is cut there, and only those regions plus one global view reach the classifier -- learned from the clip label alone.",
+    architecture: "3D CNN",
+    // Results are reported on all five in T4 (pp14-15). Kinetics-400 supplies
+    // backbone weights only, and UBI-Fights is a source of MSV clips rather
+    // than an evaluation set -- both are recorded in the review extraction.
+    // The paper's own names are "violent flows" and "real life violence".
+    datasets: [
+      "MSV",
+      "Hockey Fight",
+      "Crowd Violence",
+      "Surveillance Camera Fight",
+      "RLVS",
+    ],
+    tags: ["hard attention", "region proposal", "dataset"],
+    hue: 358,
     status: "ready",
   },
   {

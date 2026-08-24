@@ -18,8 +18,8 @@ export type StudyStatus = "ready" | "planned";
 export interface Paper {
   /**
    * Reading-list identifier, e.g. `V001`. Numbering is the reading list's own
-   * and is not contiguous -- V005 and V014 are unassigned. Also the filename
-   * prefix of the paper's PDF in /public/papers.
+   * and runs V001-V018 with no gaps. Also the filename prefix of the paper's
+   * PDF in /public/papers.
    */
   code: string;
   /** URL segment, and the PDF basename after the `code` prefix. */
