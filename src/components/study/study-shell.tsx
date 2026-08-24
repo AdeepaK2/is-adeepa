@@ -22,11 +22,17 @@ export function StudyShell({
   paper: Paper;
   studyModule?: StudyModule;
 }) {
-  const [tab, setTab] = useState<Tab>("study");
-  const [activeId, setActiveId] = useState(studyModule?.concepts[0]?.id ?? "");
+  // A review-only module has no concepts, so the Study tab has nothing to show.
+  // Open on the review instead of on the "not written yet" placeholder.
+  const hasConcepts = (studyModule?.concepts?.length ?? 0) > 0;
+  const [tab, setTab] = useState<Tab>(
+    !hasConcepts && studyModule?.review ? "review" : "study",
+  );
+  const [activeId, setActiveId] = useState(studyModule?.concepts?.[0]?.id ?? "");
 
   const active =
-    studyModule?.concepts.find((c) => c.id === activeId) ?? studyModule?.concepts[0];
+    studyModule?.concepts?.find((c) => c.id === activeId) ??
+    studyModule?.concepts?.[0];
   const accent = hueColor(paper.hue);
 
   return (
@@ -144,7 +150,7 @@ function ConceptRail({
     <nav aria-label="Concepts" className="lg:sticky lg:top-20 lg:self-start">
       <p className="eyebrow mb-3">Key concepts</p>
       <ol className="space-y-1">
-        {studyModule.concepts.map((concept, index) => {
+        {(studyModule.concepts ?? []).map((concept, index) => {
           const isActive = concept.id === activeId;
           return (
             <li key={concept.id}>

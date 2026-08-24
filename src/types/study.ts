@@ -118,7 +118,12 @@ export interface StudyModule {
   premise: string;
   /** Headline numbers, e.g. { label: "RWF-2000", value: "87.3%", note: "accuracy" }. */
   results?: { label: string; value: string; note?: string }[];
-  concepts: Concept[];
+  /**
+   * The teaching layer. Optional: a paper can carry a review extraction with no
+   * study module written for it yet, and the Study tab falls back to the
+   * overview while the Review tab renders on its own.
+   */
+  concepts?: Concept[];
   /** The comparable extraction. Optional so papers can be added one at a time. */
   review?: ReviewProfile;
 }

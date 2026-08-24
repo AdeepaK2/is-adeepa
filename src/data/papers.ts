@@ -144,7 +144,16 @@ export const papers: Paper[] = [
     summary:
       "Keeps the cheap 2D CNN backbone and adds two attention modules — one choosing where to look in the frame, one choosing when in the clip — to recover 3D-level accuracy.",
     architecture: "2D CNN + Attention",
-    datasets: ["Hockey Fight", "Movies", "Crowd Violence"],
+    // Results are reported on all four in T4; Surveillance Camera Fight was
+    // missing here before, and it is the dataset the paper actually wins on.
+    // The paper's own names for the last three are "Violent Flows", "Action
+    // Movies" and "Surveillance Fight" -- see the review extraction.
+    datasets: [
+      "Hockey Fight",
+      "Movies",
+      "Crowd Violence",
+      "Surveillance Camera Fight",
+    ],
     tags: ["spatial attention", "temporal attention", "2D CNN"],
     hue: 25,
     status: "planned",
@@ -181,9 +190,16 @@ export const papers: Paper[] = [
     doi: "10.1109/ACCESS.2023.3267409",
     pageCount: 12,
     pdf: "/papers/V008-cbam-ubi-fights.pdf",
+    // The summary here previously said the paper isolates the contribution of
+    // attention. It does the opposite: all six architectures contain a CBAM and
+    // no CBAM-free variant is ever trained -- see the review extraction.
     summary:
-      "Drops the same attention block (CBAM) into a range of backbones and measures what it buys in each, isolating the contribution of attention rather than of the architecture around it.",
-    architecture: "2D CNN + Attention",
+      "Drops the same attention block (CBAM) into six architectures, three built from scratch and three wrapping a pre-trained backbone, and argues the small ones match the big ones. Never trains a variant without the block it is named for.",
+    // Was "2D CNN + Attention". Every one of the six models pairs a convolutional
+    // feature extractor with a recurrent temporal encoder -- ConvLSTM2D, or
+    // Conv2D into an LSTM, or a backbone into a BiConvLSTM. None is a plain 2D
+    // CNN. The CBAM identity is carried by the tags instead.
+    architecture: "CNN-LSTM",
     datasets: ["UBI-Fights"],
     tags: ["CBAM", "attention", "ablation study"],
     hue: 45,
@@ -297,10 +313,14 @@ export const papers: Paper[] = [
     summary:
       "Adds a fourth dimension on top of 3D convolution so the network models interaction between clips as well as inside them, with a ResNet50 backbone and dense optical flow picking the region of interest.",
     architecture: "3D CNN",
+    // All four checked against T2 and T3 (p9-p10) and all four carry results --
+    // no correction needed here, the first paper in this review where that was
+    // true. Note the optical flow is not a dataset-level input: it selects the
+    // crop and is then discarded, so this stays a single-stream RGB model.
     datasets: ["RWF-2000", "Crowd Violence", "Movies", "Hockey Fight"],
     tags: ["4D convolution", "optical flow", "residual blocks"],
     hue: 75,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V013",
@@ -370,6 +390,10 @@ export const papers: Paper[] = [
     summary:
       "Argues a purpose-built small CNN beats a pretrained backbone for this task: a custom lightweight extractor feeds a ConvLSTM and a temporal attention module, and is measured against VGG-16, VGG-19 and MobileNetV2 on the same four sets.",
     architecture: "CNN-LSTM",
+    // All four checked against T4 (p8) and T5 (p13) and all four carry results.
+    // "Surveillance Camera Fight" is the paper's "Surveillance Fight" -- the
+    // same 300-clip Akti et al. set V011 evaluates on, kept under the library's
+    // name. No correction needed.
     datasets: [
       "Hockey Fight",
       "RLVS",
@@ -378,7 +402,7 @@ export const papers: Paper[] = [
     ],
     tags: ["ConvLSTM", "temporal attention", "lightweight"],
     hue: 345,
-    status: "planned",
+    status: "ready",
   },
   {
     code: "V017",
